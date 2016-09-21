@@ -1,0 +1,12 @@
+﻿<Window x:Class="WPFPlayerDemo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPFPlayerDemo"
+        mc:Ignorable="d"
+        Title="Music Player {$Version} 男的糊涂" Height="600" Width="800" Icon="iKu.ico" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" AllowDrop="True" Background="Black" ScrollViewer.VerticalScrollBarVisibility="Disabled" Style="{DynamicResource windowStyle}" Loaded="Window_Loaded" DragEnter="dragEnter" Drop="drop">
+    
+    
+    <Grid/>
+</Window>

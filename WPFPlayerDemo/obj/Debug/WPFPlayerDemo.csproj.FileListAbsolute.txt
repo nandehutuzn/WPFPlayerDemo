@@ -1,0 +1,16 @@
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\bin\Debug\WPFPlayerDemo.exe
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\bin\Debug\WPFPlayerDemo.pdb
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\bin\Debug\Bass.Net.dll
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.csprojResolveAssemblyReference.cache
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\MainWindow.baml
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\MainWindow.g.cs
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\App.g.cs
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo_MarkupCompile.cache
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.g.resources
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.Properties.Resources.resources
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.csproj.GenerateResource.Cache
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.exe
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.pdb
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo_MarkupCompile.lref
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\App.baml
+E:\GitHub\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\mainWindowResources.baml

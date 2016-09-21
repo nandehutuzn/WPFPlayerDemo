@@ -1,0 +1,81 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:WPFPlayerDemo">
+    <!-- 提前按钮样式-->
+    <Style x:Key="btnAdvanceStyle" TargetType="{x:Type Button}"> 
+        <Setter Property="Margin" Value="2,0,2,0"/>
+        <Setter Property="Cursor" Value="Hand"/>
+        <Setter Property="Opacity" Value="0.75"/>
+        <Setter Property="ToolTip" Value="歌词提前0.1s"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Grid>
+                        <Ellipse Width="18" Opacity=".1" StrokeThickness="2" Fill="#4f535d" Stroke="White"/>
+                        <Ellipse x:Name="borderBtn" Width="18" Stroke="White" StrokeThickness="2"/>
+                        <!-- 按钮内容 -->
+                        <Grid>
+                            <Canvas HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">
+                                <Line StrokeThickness="2" Stroke="White" X1="5" Y1="0" X2="1" Y2="4"/>
+                                <Line StrokeThickness="2" Stroke="White" X1="1" Y1="4" X2="5" Y2="8"/>
+                            </Canvas>
+                        </Grid> 
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver"  Value="True">
+                            <Setter Property="Opacity" Value="1"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!-- 窗口样式模板-->
+    <ControlTemplate x:Key="mainWindowTemplate" TargetType="{x:Type Window}">
+        <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+            <!-- borderBg 实现 窗体四周半透明的环绕 -->
+            <Border BorderThickness="5" CornerRadius="6" BorderBrush="#000000" Opacity="0.08"/>
+            <!-- borderBg实现半透明-->
+            <Border x:Name="borderBg" Margin="5" Background="{TemplateBinding Background}" BorderBrush="#ffffff" Opacity="0.9" BorderThickness="2" CornerRadius="{StaticResource winCorner}" Style="{StaticResource winBorderStyle}">
+                <!-- 定义窗口的元素，grid分别为标题栏、内容 -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                </Grid>
+            </Border>
+            <Grid Margin="7">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <!-- 标题栏框 -->
+                <Border x:Name="borderTitle" Grid.Row="0" CornerRadius="{StaticResource winTitleCorner}" Style="{StaticResource winTitleCorner}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                    <Grid Background="Transparent">
+                        <TextBlock Text="{TemplateBinding Title}" Foreground="White" Opacity="0,75" HorizontalAlignment="Left"/>
+                        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="Visible" Orientation="Horizontal">
+                            <!-- 提前、延后、歌词开关、打开文件、设置、最小化和关闭按钮 -->
+                            <Button x:Name="advanceButton" Style="{StaticResource btnAdvanceStyle}"/>
+                            <Button x:Name="delayButotn" Style="{StaticResource btnDelayStyle}"/>
+                            <Button x:Name="OpenButton" Content="打开文件" Style="{StaticResource btnOpenStyle}"/>
+                            <CheckBox x:Name="LrcButton" Content="桌面歌词" Style="{StaticResource btnLrcSyle}"/>
+                            <Button x:Name="settingButton" Style="{StaticResource btnSettingStyle}"/>
+                            <Button x:Name="minimizeButton" Style="{StaticResource btnMinimizeStyle}"/>
+                            <Button x:Name="closeButton" Style="{StaticResource btnCloseStyle}"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+                  
+        </Grid>
+    </ControlTemplate>
+
+    <!-- 窗口样式设置 -->
+    <Style x:Key="windowStyle" TargetType="{x:Type Window}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Template" Value="{StaticResource mainWindowTemplate}"/>
+        <Setter Property="WindowStyle" Value="None"/>
+        <Setter Property="AllowsTransparency" Value="True"/>
+    </Style>
+</ResourceDictionary>

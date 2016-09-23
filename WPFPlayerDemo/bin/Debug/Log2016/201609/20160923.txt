@@ -1,0 +1,8 @@
+
+ 
+记录时间：2016-09-23 19:25:40,248 
+线程ID:[9] 
+日志级别：  ERROR 
+出错类：WPFPlayerDemo.MainWindow property: [(null)] - 
+错误描述：测试
+ 

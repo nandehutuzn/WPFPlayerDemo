@@ -17,6 +17,7 @@ using System.Collections;
 using System.Windows.Media.Effects;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using System.Reflection;
 using Un4seen.Bass;
 
 namespace WPFPlayerDemo
@@ -26,6 +27,8 @@ namespace WPFPlayerDemo
     /// </summary>
     public partial class MainWindow : Window
     {
+        public  readonly log4net.ILog _log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         /// <summary>
         /// 当前实例
         /// </summary>
@@ -116,12 +119,23 @@ namespace WPFPlayerDemo
         /// </summary>
         private int[] spectrum_fall_rate = new int[42];
 
+        /// <summary>
+        /// 用于频谱线程访问的player对象
+        /// </summary>
+        private Player playerForSpectrum;
+
+        /// <summary>
+        /// 播放列表
+        /// </summary>
+        private Player play_list;
+
         
 
         public MainWindow()
         {
             InitializeComponent();
 
+            _log.Error("测试");
             //if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_CPSPEAKERS, IntPtr.Zero))
             //    MessageBox.Show("Bass 初始化失败 " + Bass.BASS_ErrorGetCode().ToString());
             //string file = @"E:\KuGou\Christina Aguilera - We Remain.mp3";

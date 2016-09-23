@@ -31,3 +31,6 @@ E:\GitHub\WPFPlayerDemo-master\WPFPlayerDemo-master\WPFPlayerDemo\obj\Debug\WPFP
 E:\GitHub\WPFPlayerDemo-master\WPFPlayerDemo-master\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.csproj.GenerateResource.Cache
 E:\GitHub\WPFPlayerDemo-master\WPFPlayerDemo-master\WPFPlayerDemo\obj\Debug\AppResources.baml
 E:\GitHub\WPFPlayerDemo-master\WPFPlayerDemo-master\WPFPlayerDemo\bin\Debug\Microsoft.Windows.Shell.dll
+E:\GitHub\WPFPlayerDemo-master\WPFPlayerDemo-master\WPFPlayerDemo\bin\Debug\log4net.dll
+E:\GitHub\WPFPlayerDemo-master\WPFPlayerDemo-master\WPFPlayerDemo\bin\Debug\WPFPlayerDemo.exe.config
+E:\GitHub\WPFPlayerDemo-master\WPFPlayerDemo-master\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.csprojResolveAssemblyReference.cache

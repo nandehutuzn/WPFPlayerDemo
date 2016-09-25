@@ -7,6 +7,7 @@ using System.Windows;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Net;
 
 namespace WPFPlayerDemo
 {
@@ -77,6 +78,78 @@ namespace WPFPlayerDemo
                 analyzeSRC(lrc);
             else //lrc 普通歌词文件
                 analyzeLRC(lrc);
+        }
+
+        /// <summary>
+        /// 构造函数 - 加载歌词文件，通过扩展名判断src或lrc
+        /// </summary>
+        /// <param name="path">歌词文件路径</param>
+        public Lyric(string path)
+        {
+            Regex ext = new Regex(@".+\.(.+)$", RegexOptions.Singleline | RegexOptions.CultureInvariant);
+            MatchCollection mc = ext.Matches(path);
+            string name = string.Empty;
+            if (mc.Count > 0)
+                name = mc[0].Groups[1].Value.Trim().ToLower();
+
+            if (name != "src" && name != "lrc")
+                throw new Exception("无效的歌词文件格式!");
+            //打开文件
+            FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            //读入文件
+            byte[] data = new byte[fs.Length];
+            fs.Read(data, 0, (int)fs.Length);
+            //关闭文件
+            fs.Flush();
+            fs.Close();
+            string lrc = Encoding.UTF8.GetString(data);
+            //解析歌词
+            analyzeOffset(lrc);
+            if (name == "src")
+                analyzeSRC(lrc);
+            else if (name == "lrc")
+                analyzeLRC(lrc);
+            filePath = path;
+        }
+
+        /// <summary>
+        /// 构造函数  - 自动搜索歌词 （来源：酷狗音乐）
+        /// </summary>
+        /// <param name="title">音乐标题</param>
+        /// <param name="singer">艺术家</param>
+        /// <param name="fileHash">文件MD5校验</param>
+        /// <param name="time">音乐时长（毫秒）</param>
+        /// <param name="savePath">是否保存为文本文件，保存路径</param>
+        public Lyric(string title, string singer, string fileHash, int time, string savePath = null)
+        {
+            try
+            {
+                //查询地址
+                string url = string.Format(
+                    @"http://mobilecdn.kugou.com/new/app/i/krc.php?cmd=201&keyword=""{0}""-""{1}""&timelength={2}&hash={3}",
+                    Helper.urlEncode(singer, "%20"),
+                    Helper.urlEncode(title, "%20"),
+                    "" + time, fileHash);
+                string urlDownload = @"http://mobilecdn.kugou.com/new/app/i/krc.php?cmd=201&kid={0}";
+                //下载歌词
+                using (WebClient wc = new WebClient())
+                {
+                    //查询歌词
+                    wc.Encoding = Encoding.UTF8;
+                    wc.DownloadStringCompleted += new DownloadStringCompletedEventHandler(
+                        (object sender, DownloadStringCompletedEventArgs e) =>
+                        {
+                            if (!e.Cancelled && e.Error == null)
+                            { 
+                            
+                            }
+                        });
+                }
+            }
+            catch (Exception ex)
+            { 
+            
+            }
         }
 
         /// <summary>

@@ -338,6 +338,21 @@ namespace WPFPlayerDemo
 
         }
 
+        /// <summary>
+        /// 窗口最小化
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void minimize(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        /// <summary>
+        /// 窗口关闭
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void close(object sender, RoutedEventArgs e)
         {
             //保存配置

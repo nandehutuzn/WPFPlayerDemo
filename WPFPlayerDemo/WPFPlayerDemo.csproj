@@ -74,6 +74,9 @@
     <Compile Include="Json.cs" />
     <Compile Include="LrcWord.cs" />
     <Compile Include="Playlist.cs" />
+    <Compile Include="Setting.xaml.cs">
+      <DependentUpon>Setting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SingleLrc.cs" />
     <Compile Include="Template\krc.cs" />
     <Compile Include="Template\krcInfo.cs" />
@@ -114,6 +117,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="mainWindowResources.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Setting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="settingResources.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

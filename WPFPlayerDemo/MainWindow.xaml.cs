@@ -19,13 +19,14 @@ using System.Windows.Interop;
 using System.Windows.Threading;
 using System.Reflection;
 using Un4seen.Bass;
+using Microsoft.Windows.Shell;
 
 namespace WPFPlayerDemo
 {
     /// <summary>
     /// MainWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IDisposable
     {
         public  readonly log4net.ILog _log = log4net.LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -127,20 +128,129 @@ namespace WPFPlayerDemo
         /// <summary>
         /// 播放列表
         /// </summary>
-        private Player play_list;
+        private Playlist play_list;
 
+        /// <summary>
+        /// 歌词对象
+        /// </summary>
+        public static Lyric lyric = null;
+
+        /// <summary>
+        /// 后台歌词处理线程
+        /// </summary>
+        private BackgroundWorker lyricWorker = new BackgroundWorker();
+
+        /// <summary>
+        /// 用于歌词线程访问的player对象
+        /// </summary>
+        private Player playerForLyric;
+
+        #region  歌词数据
+        private bool addedLyric = false;
+        private int indexLyric;
+        private string lrcLyric;
+        private double lenLyric, progressLyric, valueLyric;
+        #endregion
+
+        /// <summary>
+        /// 默认黑色背景
+        /// </summary>
+        private SolidColorBrush defaultBackground = new SolidColorBrush(Colors.Black);
+
+        /// <summary>
+        /// 歌手图片背景对象
+        /// </summary>
+        private ImageBrush singerBackground = new ImageBrush();
+
+        /// <summary>
+        /// 任务栏预览按钮
+        /// </summary>
+        private TaskbarItemInfo tii = new TaskbarItemInfo();
+
+        /// <summary>
+        /// 桌面歌词窗口
+        /// </summary>
+        public DesktopLyric desktopLyric = null;
+
+        /// <summary>
+        /// 托盘图标
+        /// </summary>
+        private System.Windows.Forms.NotifyIcon notifyIcon = new System.Windows.Forms.NotifyIcon();
+
+        #region
+        private bool disposedValue = false;//要检测冗余调用
+
+        /// <summary>
+        /// 资源释放
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    //托管资源释放
+                    this.spectrumWorker.Dispose();
+                    this.lyricWorker.Dispose();
+                    if (this.desktopLyric != null)
+                        this.desktopLyric.Dispose();
+                    this.notifyIcon.Dispose();
+                }
+                //未托管资源释放
+                disposedValue = true;
+            }
+        }
+        // TODO: 仅当以上 Dispose(bool disposing) 拥有用于释放未托管资源的代码时才替代终结器。
+        // ~MainWindow() {
+        //   Dispose(false);
+        // }
+        /// <summary>
+        /// 实现IDisposable接口
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion  IDisposable Support
         
-
+        /// <summary>
+        /// 构造函数  初始化程序
+        /// </summary>
         public MainWindow()
         {
+            _this = this;
+            //加载配置
+            Config.loadConfig(App.workPath + "\\config.db");
+            //窗口初始化事件
+            this.Loaded += initialize;
             InitializeComponent();
+            //初始化背景图片对象
+            singerBackground.Stretch = Stretch.UniformToFill;
+            singerBackground.AlignmentX = AlignmentX.Center;
+            singerBackground.AlignmentY = AlignmentY.Center;
 
-            _log.Error("测试");
             //if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_CPSPEAKERS, IntPtr.Zero))
             //    MessageBox.Show("Bass 初始化失败 " + Bass.BASS_ErrorGetCode().ToString());
             //string file = @"E:\KuGou\Christina Aguilera - We Remain.mp3";
             //int stream = Bass.BASS_StreamCreateFile(file, 0L, 0L, BASSFlag.BASS_SAMPLE_FLOAT);
             //Bass.BASS_ChannelPlay(stream, true);
+        }
+
+        /// <summary>
+        /// 窗口初始化
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void initialize(object sender, RoutedEventArgs e)
+        {
+            //标题栏版本号
+            this.Title = this.Title.Replace("{$Version}", App.version);
+            //窗口样式模板
+            ControlTemplate baseWindowTemplate = (ControlTemplate)this.Resources["mainWindowTemplate"];
+            //关闭按钮
+            Button closeButton = (Button)baseWindowTemplate.FindName("closeButton", this);
+            closeButton.Click += close;  //关闭窗口
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -227,5 +337,19 @@ namespace WPFPlayerDemo
         {
 
         }
+
+        private void close(object sender, RoutedEventArgs e)
+        {
+            //保存配置
+            Config.saveConfig(App.workPath + "\\config.db");
+            //停止频谱
+            spectrumWorker.CancelAsync();
+            //窗口歌词
+            lyricWorker.CancelAsync();
+            //yincan窗口
+            this.Hide();
+        }
+
+        
     }
 }

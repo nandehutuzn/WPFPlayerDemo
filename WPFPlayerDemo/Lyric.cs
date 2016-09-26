@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Net;
+using WPFPlayerDemo.Template;
+using zlib;
 
 namespace WPFPlayerDemo
 {
@@ -140,16 +142,60 @@ namespace WPFPlayerDemo
                         (object sender, DownloadStringCompletedEventArgs e) =>
                         {
                             if (!e.Cancelled && e.Error == null)
-                            { 
-                            
+                            {
+                                //解析查询结果
+                                krc list = Json.parse<krc>(e.Result);
+                                if (list.@default == null || list.@default.Length == 0)
+                                {
+                                    ready = true;
+                                    return;
+                                }
+                                //下载歌词
+                                using (WebClient download = new WebClient())
+                                {
+                                    download.DownloadDataCompleted += new DownloadDataCompletedEventHandler(
+                                        (s, ed) =>
+                                        {
+                                            if (!ed.Cancelled && ed.Error == null)
+                                            {
+                                                //歌词解密
+                                                byte[] data = decodeKRC(ed.Result);
+                                                if (data == null)
+                                                    return;
+                                                //保存歌词
+                                                if (savePath != null)
+                                                {
+                                                    FileStream fs = new FileStream(savePath, FileMode.Create, FileAccess.Write, FileShare.None);
+                                                    fs.Write(data, 0, data.Length);
+                                                    fs.Flush();
+                                                    fs.Close();
+                                                    filePath = savePath;
+                                                }
+                                                string lrc = Encoding.UTF8.GetString(data);
+                                                //解析歌词
+                                                analyzeOffset(lrc);
+                                                analyzeSRC(lrc);
+                                            }
+                                        });
+                                    download.DownloadDataAsync(new Uri(string.Format(urlDownload, list.@default)));
+                                }
                             }
                         });
+                    //异步执行
+                    wc.DownloadStringAsync(new Uri(url));
                 }
             }
             catch (Exception ex)
             { 
             
             }
+        }
+
+        ~Lyric()
+        {
+            //保存序列文件
+            if (lrcUpdated && srcxPath != null)
+                saveSRCX(srcxPath, this);
         }
 
         /// <summary>
@@ -332,6 +378,37 @@ namespace WPFPlayerDemo
                     });
             }
             lrcUpdated = true;
+        }
+
+        /// <summary>
+        /// KRC歌词解密
+        /// </summary>
+        /// <param name="data">歌词加密数据</param>
+        /// <returns></returns>
+        private byte[] decodeKRC(byte[] data)
+        {
+            if (data[0] != 107 || data[1] != 114 || data[2] != 99 || data[3] != 49)
+                return null;
+            byte[] key = { 64, 71, 97, 119, 94, 50, 116, 71, 81, 54, 49, 45, 206, 210, 110, 105 }; //秘钥
+            //解密
+            for (int i = 4; i < data.Length; i++)
+                data[i - 4] = (byte)(data[i] ^ key[(i - 4) % 16]);
+            //zlib解压
+            MemoryStream outfile = new MemoryStream();
+            ZOutputStream outZStream = new ZOutputStream(outfile);
+            byte[] ret;
+            try
+            {
+                outZStream.Write(data, 0, data.Length - 4);
+                outZStream.Flush();
+                outfile.Flush();
+                ret = outfile.ToArray();
+            }
+            finally
+            {
+                outZStream.Close();
+            }
+            return ret;
         }
     }
 }

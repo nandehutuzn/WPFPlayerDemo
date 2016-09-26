@@ -6,6 +6,9 @@
         xmlns:local="clr-namespace:WPFPlayerDemo"
         mc:Ignorable="d"
         Title="Music Player {$Version} 男的糊涂" Height="600" Width="800" Icon="iKu.ico" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" AllowDrop="True" Background="Black" ScrollViewer.VerticalScrollBarVisibility="Disabled" Style="{DynamicResource windowStyle}" Loaded="Window_Loaded" DragEnter="dragEnter" Drop="drop">
+    <Window.Resources>
+        <ResourceDictionary Source="mainWindowResources.xaml"/>
+    </Window.Resources>
     <!--<Window.Triggers>
         <EventTrigger RoutedEvent="UIElement.MouseEnter" SourceName="Volume">
             <BeginStoryboard x:Name="showVolume_BeginStoryboard" Storyboard="{StaticResource showVolume}"/>

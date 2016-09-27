@@ -27,5 +27,20 @@ namespace WPFPlayerDemo
         {
 
         }
+
+        private void save(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ok(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void cancel(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

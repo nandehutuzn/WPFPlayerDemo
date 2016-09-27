@@ -9,7 +9,62 @@
     <Window.Resources>
         <ResourceDictionary Source="settingResources.xaml"/>
     </Window.Resources>
-    <Grid>
-        
-    </Grid>
+    <DockPanel>
+        <!-- 左侧菜单 -->
+        <StackPanel x:Name="leftMenu" DockPanel.Dock="Left" Background="#222"/>
+            <!-- 底部按钮 -->
+        <Canvas DockPanel.Dock="Bottom" Height="40px" Background="#222">
+            <Button Content="应用" Height="25px" Width="80px" Canvas.Top="7.5px" Canvas.Right="198px" Click="save"/>
+            <Button Content="保存" Height="25px" Width="80px" Canvas.Top="7.5px" Canvas.Right="108px" TabIndex="0" Click="ok"/>
+            <Button Content="取消" Height="25px" Width="80px" Canvas.Top="7.5px" Canvas.Right="18px" Click="cancel"/>
+        </Canvas>
+        <!-- 主面板 -->
+        <ScrollViewer x:Name="scrollFrame" VerticalScrollBarVisibility="Auto" Background="#888">
+            <StackPanel x:Name="mainFrame" Margin="0,0,0,10px">
+                <Label Content="基本设置" Style="{StaticResource labTitle}"/>
+                <Label Content="启动" Style="{StaticResource labSubtitle}"/>
+                <UniformGrid Columns="2" Margin="30px,0,10px,0">
+                    <CheckBox x:Name="desktopLyric" Content="显示桌面歌词"/>
+                    <CheckBox x:Name="autoPlay" Content="自动开始播放"/>
+                </UniformGrid>
+                <Label Content="播放设置" Style="{StaticResource labTitle}"/>
+                <Label Content="播放" Style="{StaticResource labSubtitle}"/>
+                <UniformGrid Columns="2" Margin="30px,0,10px,0">
+                    <CheckBox Content="声音渐入渐出"/>
+                    <CheckBox x:Name="fx" Content="音效"/>
+                </UniformGrid>
+                <Label Content="音效" Style="{StaticResource labSubtitle}"/>
+                <ListBox x:Name="listFx" Height="150" Margin="30px,0,30px,0" ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+                <Label Content="歌词设置" Style="{StaticResource labTitle}"/>
+                <Label Content="效果" Style="{StaticResource labSubtitle}"/>
+                <UniformGrid Columns="2" Margin="30px,0,10px,0">
+                    <CheckBox x:Name="lyricAnimation" Content="开启卡拉OK效果"/>
+                    <CheckBox x:Name="lyricMove" Content="窗口歌词滚动效果"/>
+                    <CheckBox x:Name="desktopLyricLock" Content="锁定桌面歌词"/>
+                </UniformGrid>
+                <Label Content="窗口歌词显示" Style="{StaticResource labSubtitle}"/>
+                <UniformGrid Columns="4" Margin="30px,0,10px,0">
+                    <Label Content="字体"/>
+                    <ComboBox x:Name="windowFont" SelectedIndex="0"/>
+                    <Label Content="字号"/>
+                    <TextBox/>
+                    <Label Content="背景色"/>
+                    <Button/>
+                    <Label Content="前景色"/>
+                    <Button/>
+                </UniformGrid>
+                <Label Content="桌面歌词显示" Style="{StaticResource labSubtitle}"/>
+                <UniformGrid Columns="4" Margin="30px,0,10px,0">
+                    <Label Content="字体"/>
+                    <ComboBox x:Name="deskFont" SelectedIndex="0"/>
+                    <Label Content="字号"/>
+                    <TextBox/>
+                    <Label Content="背景色"/>
+                    <Button/>
+                    <Label Content="前景色"/>
+                    <Button/>
+                </UniformGrid>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
 </Window>

@@ -365,6 +365,29 @@ namespace WPFPlayerDemo
             this.Hide();
         }
 
+        /// <summary>
+        /// 设置
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void setting(object sender, RoutedEventArgs e)
+        {
+            //弹出设置窗口
+            Setting setting = new Setting();
+            setting.Owner = this;
+            setting.ShowDialog();
+        }
+
+        /// <summary>
+        /// 歌词提前
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void lrcAdvance(object sender, RoutedEventArgs e)
+        {
+            if (lyric != null)
+                lyric.Offset += 100;
+        }
         
     }
 }

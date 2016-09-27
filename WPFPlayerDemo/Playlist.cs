@@ -13,7 +13,7 @@ namespace WPFPlayerDemo
     /// 播放列表类
     /// </summary>
     [Serializable]
-    class Playlist
+    public class Playlist
     {
         /// <summary>
         /// 音乐信息

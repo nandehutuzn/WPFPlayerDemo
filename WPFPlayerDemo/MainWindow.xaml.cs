@@ -388,6 +388,176 @@ namespace WPFPlayerDemo
             if (lyric != null)
                 lyric.Offset += 100;
         }
+
+        /// <summary>
+        /// 歌词延后
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void lrcDelay(object sender, RoutedEventArgs e)
+        {
+            if (lyric != null)
+                lyric.Offset -= 100;
+        }
+
+        /// <summary>
+        /// 桌面歌词开关切换
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void lrcSwitch(object sender, RoutedEventArgs e)
+        {
+            Config config = Config.getInstance();
+            if (!(sender is Setting))
+                config.showDesktopLyric = !config.showDesktopLyric;
+
+            LrcButton.IsChecked = menuDesktopLyric.IsChecked = config.showDesktopLyric;
+            if (config.showDesktopLyric)
+            {
+                //载入桌面歌词
+                if (desktopLyric == null)
+                    desktopLyric = new DesktopLyric();
+                desktopLyric.Show();
+            }
+            else if (desktopLyric != null)
+            { 
+                //关闭桌面歌词
+                desktopLyric.Close();
+                desktopLyric.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// 打开文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void openFile(object sender, RoutedEventArgs e)
+        {
+            //打开文件对话框
+            Microsoft.Win32.OpenFileDialog ofd = new Microsoft.Win32.OpenFileDialog();
+            //标题
+            ofd.Title = "打开音乐";
+            //检查文件必须存在
+            ofd.CheckFileExists = true;
+            //允许多选（所以文件加入播放列表，自动播放第一首）
+            ofd.Multiselect = true;
+            //快捷方式返回引用的文件
+            ofd.DereferenceLinks = true;
+            //文件筛选过滤器
+            ofd.Filter = "音乐文件|*.mp3;*.mp2;*.mp1;*.ogg;*.wav;*.aiff"
+                + "|MP3|*.mp3"
+                + "|OGG|*.ogg"
+                + "|WAV|*.wav"
+                + "|AIFF|*.aiff"
+                + "|MP2|*.mp2"
+                + "|MP1|*.mp1"
+                + "|所有文件|*";
+            //文件筛选索引
+            ofd.FilterIndex = 1;
+            //打开文件
+            if (ofd.ShowDialog() == true)
+            {
+                //文件列表
+                string[] files = ofd.FileNames;
+                List.SelectedIndex = addToPlaylist(files);
+                //打开第一个文件
+                PlaylistOpen(sender, null);
+            }
+        }
+
+        /// <summary>
+        /// 向播放列表插入文件
+        /// </summary>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        private int addToPlaylist(string[] files)
+        {
+            int lastid = List.Items.Count - 2, count = -1;
+            foreach (string file in files)
+            {
+                //检验音乐文件合法性并获取音乐信息
+                MusicID3? info = Player.getInformation(file);
+                if (info == null)
+                    continue;  //音乐文件无法打开
+                //删除已存在项
+                ArrayList deleted = new ArrayList();
+                foreach (ListBoxItem lbi in List.Items)
+                {
+                    if (((string)lbi.ToolTip) == file)
+                        deleted.Add(lbi);
+                }
+                foreach (ListBoxItem lbi in deleted)
+                    List.Items.Remove(lbi);
+
+                deleted.Clear();
+                foreach (Playlist.Music music in play_list.list)
+                    if (music.path == file)
+                        deleted.Add(music);
+
+                foreach (Playlist.Music music in deleted)
+                    play_list.list.Remove(music);
+
+                //添加到列表
+                TextBlock textblock = new TextBlock();
+                textblock.TextTrimming = TextTrimming.WordEllipsis;
+                //歌曲名
+                Run title = new Run(info.Value.title);
+                title.FontSize = 20;
+                title.FontWeight = FontWeights.Bold;
+                textblock.Inlines.Add(title);
+                //时长
+                Run duration = new Run(" - " + info.Value.duration);
+                duration.FontSize = 16;
+                duration.FontStyle = FontStyles.Italic;
+                textblock.Inlines.Add(duration);
+                textblock.Inlines.Add(new LineBreak());
+                //艺术家
+                Run artist = new Run(info.Value.artisti == "" ? file : info.Value.artisti);
+                artist.FontSize = 14;
+                textblock.Inlines.Add(artist);
+                //专辑
+                Run album = new Run(info.Value.album == "" ? "" : (" - " + info.Value.album));
+                album.FontSize = 14;
+                textblock.Inlines.Add(album);
+                //宽度
+                textblock.Width = 725;
+                StackPanel stackPanel = new StackPanel();
+                stackPanel.Orientation = Orientation.Horizontal;
+                stackPanel.Children.Add(textblock);
+                ListBoxItem item = new ListBoxItem();
+                item.Content = stackPanel;
+                item.ToolTip = file;
+                item.IsTabStop = false;
+                item.MouseDoubleClick += PlaylistOpen;
+                //统计
+                lastid = List.Items.Add(item);
+                count++;
+                //添加到列表
+                play_list.list.Add(new Playlist.Music
+                {
+                    title = info.Value.title,
+                    artist = info.Value.artisti,
+                    album = info.Value.album,
+                    duration = info.Value.duration,
+                    path = file
+                });
+            }
+            //保存播放列表
+            Playlist.saveFile(ref play_list, App.workPath + "\\Playlist.db");
+            //返回插入的第一条文字id
+            return lastid - count;
+        }
+
+        /// <summary>
+        /// 播放列表打开文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PlaylistOpen(object sender, MouseButtonEventArgs e)
+        { 
+        
+        }
         
     }
 }

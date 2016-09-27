@@ -132,5 +132,50 @@ namespace WPFPlayerDemo
             }
             stream = 0;
         }
+
+        /// <summary>
+        /// 获取制定音乐文件的ID3信息
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        /// <returns>音乐ID3信息</returns>
+        public static MusicID3? getInformation(string filePath)
+        {
+            //打开文件
+            int s = Bass.BASS_StreamCreateFile(filePath, 0L, 0L, BASSFlag.BASS_SAMPLE_FLOAT);
+            if(0 == s)
+                return null;
+            //获取ID3信息
+            MusicID3 i = new MusicID3();
+            string[] info = Bass.BASS_ChannelGetTagsID3V2(s);
+            if(info!=null)
+            {
+                foreach (string str in info)
+                {
+                    if (str.StartsWith("TTT2", true, null))
+                        i.title = str.Remove(0, 5);
+                    else if (str.StartsWith("TPE1", true, null))
+                        i.artisti = str.Remove(0, 5);
+                    else if (str.StartsWith("TALB", true, null))
+                        i.album = str.Remove(0, 5);
+                }
+            }
+            info = Bass.BASS_ChannelGetTagsID3V1(s);
+            if (info != null)
+            {
+                i.title = info[0] != "" ? info[0] : i.title;
+                i.artisti = info[1] != "" ? info[1] : i.artisti;
+                i.album = info[2] != "" ? info[2] : i.album;
+                i.year = info[3];
+                i.comment = info[4];
+                i.genre_id = info[5];
+                i.track = info[6];
+            }
+            //获取时长信息
+            double seconds = Bass.BASS_ChannelBytes2Seconds(s, Bass.BASS_ChannelGetLength(s));
+            i.duration = Helper.Seconds2Time(seconds);
+            //释放文件
+            Bass.BASS_StreamFree(s);
+            return i;
+        }
     }
 }

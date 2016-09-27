@@ -73,6 +73,7 @@
     <Compile Include="Helper.cs" />
     <Compile Include="Json.cs" />
     <Compile Include="LrcWord.cs" />
+    <Compile Include="MusicID3.cs" />
     <Compile Include="Playlist.cs" />
     <Compile Include="Setting.xaml.cs">
       <DependentUpon>Setting.xaml</DependentUpon>

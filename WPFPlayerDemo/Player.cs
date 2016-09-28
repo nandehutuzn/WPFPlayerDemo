@@ -129,6 +129,50 @@ namespace WPFPlayerDemo
         }
 
         /// <summary>
+        /// 播放进度
+        /// </summary>
+        public double position 
+        {
+            get { return Bass.BASS_ChannelBytes2Seconds(stream, Bass.BASS_ChannelGetPosition(stream)); }
+            set { if (stream != 0) Bass.BASS_ChannelSetPosition(stream, value); }
+        }
+
+        /// <summary>
+        /// 播放状态
+        /// </summary>
+        public BASSActive status
+        {
+            get
+            {
+                if (stream != 0)
+                {
+                    return Bass.BASS_ChannelIsActive(stream);
+                }
+                return BASSActive.BASS_ACTIVE_STOPPED;
+            }
+        }
+
+        /// <summary>
+        /// 频谱数据
+        /// </summary>
+        private float[] _spectrum = new float[128];
+
+        /// <summary>
+        /// 获取频谱数据
+        /// </summary>
+        public float[] spectrum
+        {
+            get {
+                if (stream != 0 && status == BASSActive.BASS_ACTIVE_PLAYING)
+                    Bass.BASS_ChannelGetData(stream, _spectrum, (int)BASSData.BASS_DATA_FFT256);
+                else
+                    Array.Clear(_spectrum, 0, _spectrum.Length);
+                return _spectrum;
+            
+            }
+        }
+
+        /// <summary>
         /// 音乐ID3信息
         /// </summary>
         public MusicID3 information

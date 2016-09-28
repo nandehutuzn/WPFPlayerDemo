@@ -550,6 +550,182 @@ namespace WPFPlayerDemo
         }
 
         /// <summary>
+        /// 拖动进度条
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void progress_valueChange(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            //拖动进度条
+            if (draggingProgress)
+            {
+                Player player = Player.getInstance(Handle);
+                //改变进度
+                player.position = e.NewValue;
+                //时间显示
+                time_now.Text = Helper.Seconds2Time(e.NewValue);
+            }
+        }
+
+        /// <summary>
+        /// 播放进度时钟
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ProgressClock(object sender, EventArgs e)
+        {
+            Player player = Player.getInstance(Handle);
+            Config config = Config.getInstance();
+            if (!draggingProgress)
+            { 
+                //播放进度
+                Progress.Value = player.position;
+                //播放时间
+                time_now.Text = Helper.Seconds2Time(Progress.Value);
+                //任务栏进度条
+                tii.ProgressValue = Progress.Value / Progress.Maximum;
+            }
+            if (player.status == Un4seen.Bass.BASSActive.BASS_ACTIVE_STOPPED)
+            {
+                switch (config.playModel)
+                {
+                    case Config.PlayModel.SingleCycle: //单曲循环
+                        List.SelectedIndex = config.playlistIndex;
+                        PlaylistOpen(sender, null);
+                        break;
+                    case Config.PlayModel.OrderPlay: //顺序播放
+                        //停止播放关闭文件
+                        stop();
+                        if (config.playlistIndex >= List.Items.Count - 1)
+                        {
+                            //时钟们
+                            clocks(false);
+                            List.SelectedIndex = config.playlistIndex = 0;
+                            this.Background = defaultBackground;
+                        }
+                        else
+                        {
+                            List.SelectedIndex = ++config.playlistIndex;
+                            PlaylistOpen(sender, null);
+                        }
+                        break;
+                    case Config.PlayModel.CirculationList: //列表循环
+                        //停止播放关闭文件
+                        stop();
+                        if (config.playlistIndex >= List.Items.Count - 1)
+                            List.SelectedIndex = config.playlistIndex = 0;
+                        else
+                            List.SelectedIndex = ++config.playlistIndex;
+                        PlaylistOpen(sender, null);
+                        break;
+                    case Config.PlayModel.ShufflePlayback: //随机播放
+                        stop();
+                        int rand;
+                        do
+                        {
+                            rand = Helper.random.Next(0, List.Items.Count);
+                        } while (List.Items.Count > 1 && rand == config.playlistIndex);
+                        List.SelectedIndex = rand;
+                        PlaylistOpen(sender, null);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 更新频谱显示
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void spectrum_change(object sender, ProgressChangedEventArgs e)
+        {
+            for (int i = 0; i < 42; i++)
+            {
+                spectrum_t[i].Height = spectrum_position_t[i];
+                Canvas.SetBottom(spectrum_x[i], spectrum_position_x[i]);
+            }
+        }
+
+        /// <summary>
+        /// 频谱计算
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void spectrum_caculator(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            Player player = playerForSpectrum;
+            //频谱显示最大高度
+            int max_height = 295;
+            while (!worker.CancellationPending)
+            { 
+                //频谱数据
+                float[] spectrum = player.spectrum;
+                for (int i = 0; i < 42; i++)
+                { 
+                    //忽略最前面三条，后面每隔一条取一条
+                    int id = i * 2 + 3;
+                    //计算高度（以0.1为最大值， 但是实际在高音时间可达到0.4左右）
+                    float height = spectrum[id] * max_height * 10;
+                    if (height > max_height)
+                        height = max_height;
+                    //上升
+                    if (height > spectrum_position_t[i])
+                        spectrum_position_t[i] = (int)height;
+                    else if (spectrum_position_t[i] > 5)
+                    {
+                        //大幅下降
+                        spectrum_position_t[i] -= 5;
+                        if (spectrum_position_t[i] < height)
+                            spectrum_position_t[i] = (int)height;
+                    }
+                    else if (spectrum_position_t[i] > 0)
+                        spectrum_position_t[i]--;  //小幅下降
+                    //频谱线下落速度
+                    if (spectrum_fall_rate[i] > 0)
+                        spectrum_position_x[i] -= spectrum_fall_rate[i];
+                    if (spectrum_position_x[i] < spectrum_position_t[i] + 1)
+                    {
+                        spectrum_position_x[i] = spectrum_position_t[i] + 1;
+                        //置为-10，延迟下落
+                        spectrum_fall_rate[i] = -10;
+                    }
+                }
+                //更新显示
+                worker.ReportProgress(0);
+                //延迟获取
+                System.Threading.Thread.Sleep(35);
+            }
+        }
+
+        /// <summary>
+        /// 停止播放
+        /// </summary>
+        private void stop()
+        {
+            Player player = Player.getInstance(Handle);
+            player.stop();
+            //暂停播放按钮
+            PauseButton.Visibility = System.Windows.Visibility.Hidden;
+            PlayButton.Visibility = System.Windows.Visibility.Visible;
+            menuPause.Visibility = System.Windows.Visibility.Collapsed;
+            menuPlay.Visibility = System.Windows.Visibility.Visible;
+            tii.ThumbButtonInfos[1].ImageSource = (DrawingImage)Resources["PlayButtonImage"];
+            tii.ThumbButtonInfos[1].Command = MediaCommands.Play;
+            //任务栏进度条
+            tii.ProgressState = TaskbarItemProgressState.None;
+            //播放进度
+            Progress.Value = 0;
+            tii.ProgressValue = 0;
+            //播放时间
+            time_now.Text = Helper.Seconds2Time(Progress.Value);
+            //时钟们
+            clocks(false);
+        }
+            
+        /// <summary>
         /// 播放列表打开文件
         /// </summary>
         /// <param name="sender"></param>
@@ -601,6 +777,11 @@ namespace WPFPlayerDemo
                 clocks(true);
                 //加载背景图片
                 loadImage(information.artist);
+            }
+            else
+            {
+                Error error = player.error;
+                MessageBox.Show(error.content, error.title, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -677,8 +858,12 @@ namespace WPFPlayerDemo
         /// </summary>
         /// <param name="artist"></param>
         private void loadImage(string artist)
-        { 
-        
+        {
+            SingerImage.getImage(artist, ++SingerImage.getid, (string filepath) =>
+                {
+                    singerBackground.ImageSource = new BitmapImage(new Uri(filepath));
+                    this.Background = singerBackground;
+                });
         }
 
     }

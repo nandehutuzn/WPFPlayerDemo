@@ -68,8 +68,37 @@ namespace WPFPlayerDemo
                     wc.DownloadStringCompleted += (sender, e)=>
                         {
                             if (!e.Cancelled && e.Error == null)
-                            { }
+                            { 
+                                //解析查询结果
+                                string[] images = e.Result.Split(new char[] { '\r', '\n' });
+                                //下载图片
+                                int id = 0;
+                                foreach (string image in images)
+                                {
+                                    if (!image.StartsWith("http"))
+                                        continue;
+                                    using (WebClient download = new WebClient())
+                                    {
+                                        download.DownloadDataCompleted += (s, ed) =>
+                                            {
+                                                if (!ed.Cancelled && ed.Error == null)
+                                                { 
+                                                    //保存图片
+                                                    FileStream fs = new FileStream(path + "\\" + artist + "_" + id++ + ".jpg", FileMode.Create, FileAccess.Write, FileShare.None);
+                                                    fs.Write(ed.Result, 0, ed.Result.Length);
+                                                    fs.Flush();
+                                                    fs.Close();
+                                                    //返回第一个文件的路径
+                                                    if (id == 1 && getid == SingerImage.getid)
+                                                        ret(path + "\\" + artist + "_0.jpg");
+                                                }
+                                            };
+                                        download.DownloadDataAsync(new Uri(image));
+                                    }
+                                }
+                            }
                         };
+                    wc.DownloadStringAsync(new Uri(url));
                 }
             }
             catch(Exception){}

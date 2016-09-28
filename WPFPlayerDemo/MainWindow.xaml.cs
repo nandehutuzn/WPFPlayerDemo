@@ -513,7 +513,7 @@ namespace WPFPlayerDemo
                 textblock.Inlines.Add(duration);
                 textblock.Inlines.Add(new LineBreak());
                 //艺术家
-                Run artist = new Run(info.Value.artisti == "" ? file : info.Value.artisti);
+                Run artist = new Run(info.Value.artist == "" ? file : info.Value.artist);
                 artist.FontSize = 14;
                 textblock.Inlines.Add(artist);
                 //专辑
@@ -537,7 +537,7 @@ namespace WPFPlayerDemo
                 play_list.list.Add(new Playlist.Music
                 {
                     title = info.Value.title,
-                    artist = info.Value.artisti,
+                    artist = info.Value.artist,
                     album = info.Value.album,
                     duration = info.Value.duration,
                     path = file
@@ -555,9 +555,131 @@ namespace WPFPlayerDemo
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void PlaylistOpen(object sender, MouseButtonEventArgs e)
+        {
+            if (List.Items.Count <= 0)
+            {
+                openFile(sender, e);
+                return;
+            }
+            Player player = Player.getInstance(Handle);
+            Config config = Config.getInstance();
+            //打开文件
+            if (List.SelectedIndex < 0)
+                List.SelectedIndex = 0;
+            string file = (string)((ListBoxItem)List.Items.GetItemAt(List.SelectedIndex)).ToolTip;
+            List.ScrollIntoView(List.SelectedItem);
+            player.openFile(file);
+            if (player.play(true))
+            {
+                //清楚背景图片
+                this.Background = defaultBackground;
+                //记录
+                config.playlistIndex = List.SelectedIndex;
+                //进度条最大值
+                Progress.Maximum = player.length;
+                //音乐长度
+                time_total.Text = "/" + Helper.Seconds2Time(Progress.Maximum);
+                //暂停播放按钮
+                PauseButton.Visibility = System.Windows.Visibility.Visible;
+                PlayButton.Visibility = System.Windows.Visibility.Hidden;
+                menuPause.Visibility = System.Windows.Visibility.Visible;
+                menuPlay.Visibility = System.Windows.Visibility.Collapsed;
+                tii.ThumbButtonInfos[1].ImageSource = (DrawingImage)Resources["PauseButtonImage"];
+                tii.ThumbButtonInfos[1].Command = MediaCommands.Pause;
+                //任务栏进度条
+                tii.ProgressState = TaskbarItemProgressState.Normal;
+                //音乐信息
+                MusicID3 information = player.information;
+                TitleLabel.Content = information.title;
+                SingerLabel.Content = information.artist;
+                AlbumLabel.Content = information.album;
+                //任务栏描述
+                tii.Description = information.title + " - " + information.artist;
+                //歌词
+                loadLyric(information.title, information.artist, Helper.GetHash(file), (int)Math.Round(player.length * 1000), file);
+                //时钟们
+                clocks(true);
+                //加载背景图片
+                loadImage(information.artist);
+            }
+        }
+
+        /// <summary>
+        /// 加载歌词到窗口显示
+        /// </summary>
+        /// <param name="title">标题</param>
+        /// <param name="artist">艺术家</param>
+        /// <param name="hash">文件Hash</param>
+        /// <param name="time">音乐时长</param>
+        /// <param name="path">文件路径</param>
+        private void loadLyric(string title, string artist, string hash, int time, string path)
+        {
+            //删除歌词
+            lyric = null;
+            Lrc.Children.Clear();
+            addedLyric = false;
+            //序列化路径不存在
+            if (!Directory.Exists(App.workPath + "\\lyrics"))
+                Directory.CreateDirectory(App.workPath + "\\lyrics");
+            string t = Helper.pathClear(title);
+            string a = Helper.pathClear(artist);
+            //查找歌词文件
+            if (File.Exists(App.workPath + "\\lyrics\\" + a + " - " + t + ".srcx"))
+            {
+                lyric = Lyric.loadSRCX(App.workPath + "\\lyrics\\" + a + " - " + t + ".srcx");
+                if (lyric != null)
+                    return;
+            }
+            if (File.Exists(App.workPath + "\\lyrics\\" + a + " - " + t + ".src"))
+            {
+                lyric = new Lyric(App.workPath + "\\lyrics\\" + a + " - " + t + ".src");
+                //序列化保存
+                Lyric.saveSRCX(App.workPath + "\\lyrics\\" + a + " - " + t + ".srcx", lyric);
+            }
+            else if (File.Exists(App.workPath + "\\lyrics\\" + a + " - " + t + ".lrc"))
+            {
+                lyric = new Lyric(App.workPath + "\\lyrics\\" + a + " - " + t + ".lrc");
+                //序列化保存
+                Lyric.saveSRCX(App.workPath + "\\lyrics\\" + a + " - " + t + ".srcx", lyric);
+            }
+            else if (File.Exists(path.Remove(path.LastIndexOf('.') + 1) + "src"))
+            {
+                lyric = new Lyric(path.Remove(path.LastIndexOf('.') + 1) + "src");
+                //序列化保存
+                Lyric.saveSRCX(App.workPath + "\\lyrics\\" + a + " - " + t + ".srcx", lyric);
+            }
+            else if (File.Exists(path.Remove(path.LastIndexOf('.') + 1) + "lrc"))
+            {
+                lyric = new Lyric(path.Remove(path.LastIndexOf('.') + 1) + "lrc");
+                //序列化保存
+                Lyric.saveSRCX(App.workPath + "\\lyrics\\" + a + " - " + t + ".srcx", lyric);
+            }
+            else
+                lyric = new Lyric(title, artist, hash, time, App.workPath + "\\lyrics\\" + a + " - " + t + ".src");
+            //序列化保存
+            lyric.srcxPath = App.workPath + "\\lyrics\\" + a + " - " + t + ".srcx";
+        }
+
+        /// <summary>
+        /// 启动/停止时钟们
+        /// </summary>
+        /// <param name="start"></param>
+        private void clocks(bool start)
+        {
+            if (start)
+                progressClock.Start();
+            else
+                progressClock.Stop();
+        }
+
+        /// <summary>
+        /// 加载歌手图片到窗口显示
+        /// </summary>
+        /// <param name="artist"></param>
+        private void loadImage(string artist)
         { 
         
         }
-        
+
     }
 }

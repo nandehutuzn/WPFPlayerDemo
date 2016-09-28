@@ -78,6 +78,7 @@
     <Compile Include="Setting.xaml.cs">
       <DependentUpon>Setting.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SingerImage.cs" />
     <Compile Include="SingleLrc.cs" />
     <Compile Include="Template\krc.cs" />
     <Compile Include="Template\krcInfo.cs" />

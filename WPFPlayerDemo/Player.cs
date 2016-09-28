@@ -121,6 +121,59 @@ namespace WPFPlayerDemo
         }
 
         /// <summary>
+        /// 音乐长度
+        /// </summary>
+        public double length
+        {
+            get { return Bass.BASS_ChannelBytes2Seconds(stream, Bass.BASS_ChannelGetLength(stream)); }
+        }
+
+        /// <summary>
+        /// 音乐ID3信息
+        /// </summary>
+        public MusicID3 information
+        {
+            get
+            {
+                MusicID3 i = new MusicID3();
+                if (stream != 0)
+                {
+                    string[] info = Bass.BASS_ChannelGetTagsID3V2(stream);
+                    if (info != null)
+                    {
+                        foreach (string s in info)
+                        {
+                            if (s.StartsWith("TIT2", true, null))
+                            {
+                                i.title = s.Remove(0, 5);
+                            }
+                            else if (s.StartsWith("TPE1", true, null))
+                            {
+                                i.artist = s.Remove(0, 5);
+                            }
+                            else if (s.StartsWith("TALB", true, null))
+                            {
+                                i.album = s.Remove(0, 5);
+                            }
+                        }
+                    }
+                    info = Bass.BASS_ChannelGetTagsID3V1(stream);
+                    if (info != null)
+                    {
+                        i.title = info[0] != "" ? info[0] : i.title;
+                        i.artist = info[1] != "" ? info[1] : i.artist;
+                        i.album = info[2] != "" ? info[2] : i.album;
+                        i.year = info[3];
+                        i.comment = info[4];
+                        i.genre_id = info[5];
+                        i.track = info[6];
+                    }
+                }
+                return i;
+            }
+        }
+
+        /// <summary>
         /// 停止播放
         /// </summary>
         public void stop()
@@ -154,7 +207,7 @@ namespace WPFPlayerDemo
                     if (str.StartsWith("TTT2", true, null))
                         i.title = str.Remove(0, 5);
                     else if (str.StartsWith("TPE1", true, null))
-                        i.artisti = str.Remove(0, 5);
+                        i.artist = str.Remove(0, 5);
                     else if (str.StartsWith("TALB", true, null))
                         i.album = str.Remove(0, 5);
                 }
@@ -163,7 +216,7 @@ namespace WPFPlayerDemo
             if (info != null)
             {
                 i.title = info[0] != "" ? info[0] : i.title;
-                i.artisti = info[1] != "" ? info[1] : i.artisti;
+                i.artist = info[1] != "" ? info[1] : i.artist;
                 i.album = info[2] != "" ? info[2] : i.album;
                 i.year = info[3];
                 i.comment = info[4];
@@ -176,6 +229,34 @@ namespace WPFPlayerDemo
             //释放文件
             Bass.BASS_StreamFree(s);
             return i;
+        }
+
+        /// <summary>
+        /// 打开文件
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        /// <returns>是否打开成功</returns>
+        public bool openFile(string filePath)
+        {
+            //停止当前的播放
+            stop();
+            //打开新文件
+            stream = Bass.BASS_StreamCreateFile(filePath, 0L, 0L, BASSFlag.BASS_SAMPLE_FLOAT);
+            //设置音量
+            volume = _volumn;
+            return stream != 0;
+        }
+
+        /// <summary>
+        /// 开始播放
+        /// </summary>
+        /// <param name="restart">重头开始</param>
+        /// <returns>播放结果</returns>
+        public bool play(bool restart = false)
+        {
+            //设置音量
+            volume = _volumn;
+            return stream != 0 && Bass.BASS_ChannelPlay(stream, restart);
         }
     }
 }

@@ -55,7 +55,7 @@ E:\GitHub\Test\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.Properties.Re
 E:\GitHub\Test\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.csproj.GenerateResource.Cache
 E:\GitHub\Test\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\DesktopLyric.baml
 E:\GitHub\Test\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\DesktopLyric.g.cs
-E:\GitHub\Test\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.csprojResolveAssemblyReference.cache
 E:\GitHub\Test\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\Setting.g.cs
 E:\GitHub\Test\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\Setting.baml
 E:\GitHub\Test\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\settingResources.baml
+E:\GitHub\Test\WPFPlayerDemo\WPFPlayerDemo\obj\Debug\WPFPlayerDemo.csprojResolveAssemblyReference.cache

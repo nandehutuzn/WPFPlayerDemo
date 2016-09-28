@@ -18,7 +18,7 @@ namespace WPFPlayerDemo
         /// <summary>
         /// 艺术家
         /// </summary>
-        public string artisti;  //max  30  chars
+        public string artist;  //max  30  chars
 
         /// <summary>
         /// 专辑

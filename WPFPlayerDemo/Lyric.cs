@@ -451,5 +451,40 @@ namespace WPFPlayerDemo
             if (srcxPath != null)
                 saveSRCX(srcxPath, this);
         }
+
+        /// <summary>
+        /// 加载序列化歌词
+        /// </summary>
+        /// <param name="path">文件路径</param>
+        /// <returns>歌词对象</returns>
+        public static Lyric loadSRCX(string path)
+        {
+            //文件流
+            Stream fStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+            Lyric obj;
+            try
+            {
+                //二进制反序列化器
+                BinaryFormatter binFormat = new BinaryFormatter();
+                //反序列化对象
+                obj = (Lyric)binFormat.Deserialize(fStream);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+            finally
+            {
+                fStream.Close();
+            }
+            //默认字体
+            obj.fontFamily = new FontFamily("Courier New");
+            obj.fontStyle = FontStyles.Normal;
+            obj.fontWeight = FontWeights.Bold;
+            obj.fontStretch = FontStretches.Normal;
+            obj.fontSize = 20;
+            obj.foreground = Brushes.Black;
+            return obj;
+        }
     }
 }

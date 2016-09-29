@@ -4,7 +4,7 @@
     <!-- 窗口样式模板 -->
     <ControlTemplate x:Key="settingTemplate" TargetType="{x:Type Window}">
         <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
-            <!-- borderBer 元素  ：实现窗体四周半透明的环绕 -->
+            <!--border元素：实现窗体四周半透明的环绕-->
             <Border BorderThickness="5" CornerRadius="6" BorderBrush="#000000" Opacity="0.08"/>
             <!-- borderBg实现半透明 -->
             <Border x:Name="borderBg" Margin="5" Background="{TemplateBinding Background}" BorderBrush="#ffffff" Opacity="0.9" BorderThickness="2" CornerRadius="{StaticResource winCorner}" Style="{StaticResource winBorderStyle}">

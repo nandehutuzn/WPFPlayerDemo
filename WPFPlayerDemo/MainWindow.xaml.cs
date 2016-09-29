@@ -93,7 +93,7 @@ namespace WPFPlayerDemo
         /// <summary>
         /// 进度时间颜色
         /// </summary>
-        private Brush propressColor = new SolidColorBrush(Colors.White);
+        private Brush progressColor = new SolidColorBrush(Colors.White);
 
         /// <summary>
         /// 进度时间拖动时颜色
@@ -251,91 +251,574 @@ namespace WPFPlayerDemo
             //关闭按钮
             Button closeButton = (Button)baseWindowTemplate.FindName("closeButton", this);
             closeButton.Click += close;  //关闭窗口
+            //最小化按钮
+            Button minimizeButton = (Button)baseWindowTemplate.FindName("minimizeButton", this);
+            minimizeButton.Click += minimize;
+            //设置按钮
+            Button settingButton = (Button)baseWindowTemplate.FindName("settingButton", this);
+            settingButton.Click += setting;
+            //歌词提前按钮
+            Button advanceButton = (Button)baseWindowTemplate.FindName("advanceButton", this);
+            advanceButton.Click += lrcAdvance; //歌词提前
+            //歌词延后按钮
+            Button delayButton = (Button)baseWindowTemplate.FindName("delayButton", this);
+            delayButton.Click += lrcDelay; // 歌词延后
+            //桌面歌词开关按钮
+            LrcButton = (CheckBox)baseWindowTemplate.FindName("LrcButton", this);
+            LrcButton.Click += lrcSwitch; //切换桌面歌词显示状态
+            //打开文件按钮
+            OpenButton = (Button)baseWindowTemplate.FindName("OpenButton", this);
+            OpenButton.Click += openFile; //打开文件
+            //菜单
+            menu = (ContextMenu)MainBody.FindResource("notifyIconMenu");
+            //菜单播放项
+            menuPlay = (MenuItem)this.FindName("menuPlay");
+            //菜单暂停项
+            menuPause = (MenuItem)this.FindName("menuPause");
+            //菜单桌面歌词开关项
+            menuDesktopLyric = (MenuItem)this.FindName("menuDesktopLyric");
+
+            //事件绑定
+            this.CommandBindings.Add(new CommandBinding(MediaCommands.Play, (m_sender, m_e) =>
+                {
+                    PlayButton_Click(m_sender, null);
+                    m_e.Handled = true;
+                }));  //播放
+            this.CommandBindings.Add(new CommandBinding(MediaCommands.Pause, (m_sender, m_e) =>
+                {
+                    PauseButton_Click(m_sender, null);
+                    m_e.Handled = true;
+                })); //暂停
+            this.CommandBindings.Add(new CommandBinding(MediaCommands.PreviousTrack, (m_sender, m_e) =>
+                {
+                    LastButton_Click(m_sender, null);
+                    m_e.Handled = true;
+                }));//上一曲
+            this.CommandBindings.Add(new CommandBinding(MediaCommands.NextTrack, (m_sender, m_e) =>
+                {
+                    NextButton_Click(m_sender, null);
+                    m_e.Handled = true;
+                }));//下一曲
+
+            //频谱
+            for (int i = 1; i <= 42; i++)
+            {
+                spectrum_t[i - 1] = (Rectangle)Spectrum.FindName("ppt" + i);
+                spectrum_x[i - 1] = (Rectangle)Spectrum.FindName("ppx" + i);
+            }
+
+            //窗口拖动
+            this.MouseLeftButtonDown += delegate { this.MouseMove += dragWindow; };
+            this.MouseUp += delegate { this.MouseMove -= dragWindow; };
+
+            //进度条拖动
+            Progress.PreviewMouseDown += (s, ed) =>
+                {
+                    draggingProgress = true;
+                    Progress.ValueChanged += progress_valueChange;
+                    //时间文本颜色
+                    time_now.Foreground = draggingProgressColor;
+                };
+            Progress.PreviewMouseUp += (s, ed) =>
+                {
+                    draggingProgress = false;
+                    Progress.ValueChanged -= progress_valueChange;
+                    //时间本文颜色
+                    time_now.Foreground = progressColor;
+                };
+
+            //播放列表按钮效果
+            shadow.ShadowDepth = 0;
+            shadow.Color = Colors.White;
+            shadow.Opacity = 1;
+            PlayListButton.Effect = shadow;
+
+            //时间显示
+            TimeLabel.Inlines.Clear();
+            TimeLabel.Inlines.Add(time_now);
+            TimeLabel.Inlines.Add(time_total);
+
+            //时钟设置
+            progressClock.Interval = new TimeSpan(0, 0, 0, 0, 250);
+            progressClock.Tick += ProgressClock;
+            //progressClock.Start(); //仅在播放时启动
+
+            //频谱线程
+            playerForSpectrum = Player.getInstance(Handle);
+            spectrumWorker.WorkerReportsProgress = true;
+            spectrumWorker.WorkerSupportsCancellation = true;
+            spectrumWorker.ProgressChanged += spectrum_change;
+            spectrumWorker.DoWork += spectrum_caculator;
+
+            //歌词线程
+            playerForLyric = Player.getInstance(Handle);
+            lyricWorker.WorkerReportsProgress = true;
+            lyricWorker.WorkerSupportsCancellation = true;
+            lyricWorker.ProgressChanged += LyricWorker_ProgressChanged;
+            lyricWorker.DoWork += LyricWorker_DoWork;
         }
 
+        /// <summary>
+        /// 窗口加载完成
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            //频谱线程和窗口歌词线程
+            spectrumWorker.RunWorkerAsync();
+            lyricWorker.RunWorkerAsync();
+            //歌手图片保存路径
+            SingerImage.path = App.workPath + "\\singer";
+            //加载配置
+            Config config = Config.getInstance();
+            //窗口位置
+            if (config.position.X > -Width &&
+                config.position.X < SystemParameters.PrimaryScreenWidth &&
+                config.position.Y > -Height &&
+                config.position.Y < SystemParameters.PrimaryScreenHeight)
+            {
+                Left = config.position.X;
+                Top = config.position.Y;
+            }
+            else
+            {
+                config.position.X = Left;
+                config.position.Y = Top;
+            }
+            //播放列表状态
+            if (config.playListVisible)
+            {
+                PlayList.Visibility = System.Windows.Visibility.Visible;
+                shadow.BlurRadius = 20;
+            }
+            else
+            {
+                PlayList.Visibility = System.Windows.Visibility.Collapsed;
+                shadow.BlurRadius = 0;
+            }
+            //音量
+            Player.getInstance(Handle).volumn = config.volumn;
+            VolumeBar.Value = config.volumn;
+            //加载播放列表
+            load_playlist();
+            List.SelectedIndex = config.playlistIndex;
+            //播放模式
+            switch (config.playModel)
+            {
+                case Config.PlayModel.SingleCycle:
+                    Model.SelectedIndex = 2;  //单曲循环
+                    break;
+                case Config.PlayModel.OrderPlay:
+                    Model.SelectedIndex = 1;  //顺序播放
+                    break;
+                case Config.PlayModel.CirculationList:
+                    Model.SelectedIndex = 0; //列表循环
+                    break;
+                case Config.PlayModel.ShufflePlayback:
+                    Model.SelectedIndex = 3;  //随机播放
+                    break;
+                default:
+                    break;
+            }
+            //任务栏预览按钮
+            tii.Description = "iKu Player";
+            tii.ProgressState = TaskbarItemProgressState.None;
+            tii.ProgressValue = 0;
+            //上一曲按钮
+            ThumbButtonInfo tbi_Last = new ThumbButtonInfo();
+            tbi_Last.Command = MediaCommands.PreviousTrack;
+            tbi_Last.CommandTarget = this;
+            tbi_Last.Description = "上一曲";
+            tbi_Last.DismissWhenClicked = false;
+            tbi_Last.ImageSource = (DrawingImage)Resources["LastButtonImage"];
+            tii.ThumbButtonInfos.Add(tbi_Last);
+            //播放按钮
+            ThumbButtonInfo tbi_Play = new ThumbButtonInfo();
+            tbi_Play.Command = MediaCommands.Play;
+            tbi_Play.CommandTarget = this;
+            tbi_Play.Description = "播放";
+            tbi_Play.DismissWhenClicked = false;
+            tbi_Play.ImageSource = (DrawingImage)Resources["PlayButtonImage"];
+            tii.ThumbButtonInfos.Add(tbi_Play);
+            //下一曲按钮
+            ThumbButtonInfo tbi_Next = new ThumbButtonInfo();
+            tbi_Next.Command = MediaCommands.NextTrack;
+            tbi_Next.CommandTarget = this;
+            tbi_Next.Description = "下一曲";
+            tbi_Next.DismissWhenClicked = false;
+            tbi_Next.ImageSource = (DrawingImage)Resources["NextButtonImage"];
+            tii.ThumbButtonInfos.Add(tbi_Next);
+            //TaskbarItemInfo.SetTaskbarItemInfo(this, tii);
+            //托盘图标
+            notifyIcon.BalloonTipTitle = "iKu Player" + App.version;
+            notifyIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            notifyIcon.BalloonTipText = "欢迎使用！";
+            notifyIcon.Text = "iKu Player" + App.version;
+            notifyIcon.Icon = new System.Drawing.Icon(Application.GetResourceStream(new Uri("iKu.ico", UriKind.Relative)).Stream);
+            notifyIcon.ContextMenu = new System.Windows.Forms.ContextMenu();
+            notifyIcon.Visible = true; //显示托盘图标
+            notifyIcon.MouseClick += notifyIcon_MouseClick;
+            notifyIcon.ShowBalloonTip(3000); //显示欢迎提示
+            //启动参数
+            if (App.Args.Length > 0)
+            {
+                //添加到播放列表
+                List.SelectedIndex = addToPlaylist(App.Args);
+                PlaylistOpen(sender, null);
+            }
+            else if (config.autoPlay)
+                PlaylistOpen(sender, null);
 
+            //桌面歌词
+            if (config.showDesktopLyric)
+            {
+                desktopLyric = new DesktopLyric();
+                desktopLyric.Show();
+            }
+            //LrcButton.IsChecked = menuDesktopLyric.IsChecked = config.showDesktopLyric;
+            //配置加载完成
+            Config.loaded = true;
         }
 
+        /// <summary>
+        /// 加载播放列表
+        /// </summary>
+        private void load_playlist()
+        {
+            Playlist.loadFile(out play_list, App.workPath + "\\Playlist.db");
+            foreach (Playlist.Music music in play_list.list)
+            {
+                TextBlock textblock = new TextBlock();
+                textblock.TextTrimming = TextTrimming.WordEllipsis;
+                //歌曲名
+                Run title = new Run(music.title);
+                title.FontSize = 20;
+                title.FontWeight = FontWeights.Bold;
+                textblock.Inlines.Add(title);
+                //时长
+                Run duration = new Run(music.duration == "" ? "" : (" - " + music.duration));
+                duration.FontSize = 16;
+                duration.FontStyle = FontStyles.Italic;
+                textblock.Inlines.Add(duration);
+                textblock.Inlines.Add(new LineBreak());
+                //艺术家
+                Run artist = new Run(music.artist == "" ? music.path : music.artist);
+                artist.FontSize = 14;
+                textblock.Inlines.Add(artist);
+                //专辑
+                Run album = new Run(music.album == "" ? "" : (" - " + music.album));
+                album.FontSize = 14;
+                textblock.Inlines.Add(album);
+                //宽度
+                textblock.Width = 725;
+                StackPanel stackPanel = new StackPanel();
+                stackPanel.Orientation = Orientation.Horizontal;
+                stackPanel.Children.Add(textblock);
+                ListBoxItem item = new ListBoxItem();
+                item.Content = stackPanel;
+                item.ToolTip = music.path;
+                item.IsTabStop = false;
+                item.MouseDoubleClick += PlaylistOpen;
+                List.Items.Add(item);
+            }
+        }
+
+        /// <summary>
+        /// 文件拖入
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void dragEnter(object sender, DragEventArgs e)
         {
-
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effects = DragDropEffects.All;
+            else
+                e.Effects = DragDropEffects.None;
         }
 
+        /// <summary>
+        /// 得到文件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void drop(object sender, DragEventArgs e)
         {
-
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            if (files.Length == 0)  //没有选择文件
+                return;
+            //添加到播放列表
+            List.SelectedIndex = addToPlaylist(files);
+            if (sender != List) //不是播放列表得到的， 打开第一个文件
+                PlaylistOpen(sender, null);
+            //已处理，防止冒泡事件
+            e.Handled = true;
         }
 
+        /// <summary>
+        /// 播放按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void PlayButton_Click(object sender, RoutedEventArgs e)
         {
-
+            Player player = Player.getInstance(Handle);
+            if (!player.openedFile)
+                PlaylistOpen(sender, null);
+            else
+            {
+                player.play();
+                //时钟们
+                clocks(true);
+            }
+            //暂停播放按钮
+            PauseButton.Visibility = System.Windows.Visibility.Visible;
+            PlayButton.Visibility = System.Windows.Visibility.Hidden;
+            menuPause.Visibility = System.Windows.Visibility.Visible;
+            menuPlay.Visibility = System.Windows.Visibility.Collapsed;
+            tii.ThumbButtonInfos[1].ImageSource = (DrawingImage)Resources["PauseButtonImage"];
+            tii.ThumbButtonInfos[1].Command = MediaCommands.Pause;
+            //任务栏进度条
+            tii.ProgressState = TaskbarItemProgressState.Normal;
         }
 
+        /// <summary>
+        /// 暂停按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
-
+            Player player = Player.getInstance(Handle);
+            player.pause();
+            //暂停播放按钮
+            PauseButton.Visibility = System.Windows.Visibility.Hidden;
+            PlayButton.Visibility = System.Windows.Visibility.Visible;
+            menuPause.Visibility = System.Windows.Visibility.Collapsed;
+            menuPlay.Visibility = System.Windows.Visibility.Visible;
+            tii.ThumbButtonInfos[1].ImageSource = (DrawingImage)Resources["PlayButtonImage"];
+            tii.ThumbButtonInfos[1].Command = MediaCommands.Play;
+            //任务栏进度条
+            tii.ProgressState = TaskbarItemProgressState.Paused;
+            //时钟们
+            clocks(false);
         }
 
+        /// <summary>
+        /// 上一曲
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LastButton_Click(object sender, RoutedEventArgs e)
         {
-
+            Config config = Config.getInstance();
+            //停止播放关闭文件
+            stop();
+            if (config.playlistIndex <= 0)
+                List.SelectedIndex = config.playlistIndex = List.Items.Count - 1;
+            else
+                List.SelectedIndex = --config.playlistIndex;
+            PlaylistOpen(sender, null);
         }
 
+        /// <summary>
+        /// 下一曲
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void NextButton_Click(object sender, RoutedEventArgs e)
         {
-
+            Config config = Config.getInstance();
+            //停止播放关闭文件
+            stop();
+            if (config.playlistIndex >= List.Items.Count - 1)
+                List.SelectedIndex = config.playlistIndex = 0;
+            else
+                List.SelectedIndex = ++config.playlistIndex;
+            PlaylistOpen(sender, null);
         }
 
+        /// <summary>
+        /// 播放列表按钮
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void PlayListButton_Click(object sender, RoutedEventArgs e)
         {
-
+            Config config = Config.getInstance();
+            //显示/隐藏播放列表
+            if (config.playListVisible)
+            {
+                PlayList.Visibility = System.Windows.Visibility.Collapsed;
+                shadow.BlurRadius = 0;
+                config.playListVisible = false;
+            }
+            else
+            {
+                PlayList.Visibility = System.Windows.Visibility.Visible;
+                shadow.BlurRadius = 20;
+                config.playListVisible = true;
+            }
         }
 
+        /// <summary>
+        /// 静音
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void MuteButton_Click(object sender, RoutedEventArgs e)
         {
-
+            //静音并显示取消静音按钮
+            MuteButton.Visibility = System.Windows.Visibility.Hidden;
+            Player.getInstance(Handle).mute = true;
+            VolumeButton.Visibility = System.Windows.Visibility.Visible;
         }
 
+        /// <summary>
+        /// 音量
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void VolumeButton_Click(object sender, RoutedEventArgs e)
         {
-
+            //取消静音并显示静音按钮
+            VolumeButton.Visibility = System.Windows.Visibility.Hidden;
+            Player.getInstance(Handle).mute = false;
+            MuteButton.Visibility = System.Windows.Visibility.Visible;
         }
 
+        /// <summary>
+        /// 拖动音量条
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void VolumeBar_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-
+            Player player = Player.getInstance(Handle);
+            //调整音量
+            player.volumn = (int)Math.Round(e.NewValue);
+            //保存音量
+            Config.getInstance().volumn = (int)Math.Round(VolumeBar.Value);
+            //显示静音按钮
+            VolumeButton.Visibility = System.Windows.Visibility.Hidden;
+            MuteButton.Visibility = System.Windows.Visibility.Visible;
         }
 
+        /// <summary>
+        /// 播放模式改变
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Model_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            Config config = Config.getInstance();
+            switch (Model.SelectedIndex)
+            {
+                case 0:  //列表循环
+                    config.playModel = Config.PlayModel.CirculationList;
+                    break;
+                case 1:  //顺序播放
+                    config.playModel = Config.PlayModel.OrderPlay;
+                    break;
+                case 2:  //单曲循环
+                    config.playModel = Config.PlayModel.SingleCycle;
+                    break;
+                case 3:  //随机循环
+                    config.playModel = Config.PlayModel.ShufflePlayback;
+                    break;
+                default:
+                    break;
+            }
         }
 
+        /// <summary>
+        /// 删除播放列表选中项
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
-
+            //删除已存在项
+            ArrayList deleted = new ArrayList();
+            ArrayList deletedItems = new ArrayList();
+            foreach (ListBoxItem lbi in List.SelectedItems)
+            {
+                foreach (Playlist.Music music in play_list.list)
+                {
+                    if (music.path == (string)lbi.ToolTip)
+                    {
+                        deleted.Add(music);
+                        break;
+                    }
+                }
+                deletedItems.Add(lbi);
+            }
+            //删除显示列表
+            foreach (ListBoxItem item in deletedItems)
+                List.Items.Remove(item);
+            //删除存储列表
+            foreach (Playlist.Music music in deleted)
+                play_list.list.Remove(music);
+            //保存播放列表
+            Playlist.saveFile(ref play_list, App.workPath + "\\Playlist.db");
         }
 
-        private void menuPlay_Click(object sender, RoutedEventArgs e)
-        {
 
-        }
-
-        private void menuDesktopLyric_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
+        /// <summary>
+        /// 托盘菜单  - 关于
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void about(object sender, RoutedEventArgs e)
         {
-
+            DateTime time = File.GetLastWriteTime(System.Windows.Forms.Application.ExecutablePath);
+            notifyIcon.ShowBalloonTip(10000, string.Format("关于 iKu Player {0}", App.version),
+                string.Format(@"{0:0000} - {1:00}-{2:00} {3:00}:{4:00}:{5:00} Powered by Bass.Net C# WPF https://github.com/nandehutuzn/WPFPlayerDemo.git",
+                time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second), System.Windows.Forms.ToolTipIcon.Info);
         }
 
+        /// <summary>
+        /// 退出程序
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void exit(object sender, RoutedEventArgs e)
         {
+            //托盘图标处理
+            notifyIcon.Visible = false;
+            //保存配置
+            Config.saveConfig(App.workPath + "\\config.db");
+            //关闭桌面歌词
+            if (desktopLyric != null)
+            {
+                desktopLyric.Close();
+                desktopLyric.Dispose();
+                desktopLyric = null;
+            }
+            //关闭窗口
+            this.Close();
+            //结束程序
+            Application.Current.Shutdown();
+        }
 
+        /// <summary>
+        /// 窗口拖动
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void dragWindow(object sender, MouseEventArgs e)
+        {
+            Config config = Config.getInstance();
+            //鼠标不在进度条、音量条、播放列表上时
+            if (e.LeftButton == MouseButtonState.Pressed &&
+                !this.Progress.IsMouseOver &&
+                !this.Volume.IsMouseOver &&
+                !this.List.IsMouseOver)
+            {
+                this.DragMove();//拖动窗口
+                config.position.X = Left;
+                config.position.Y = Top;
+            }
         }
 
         /// <summary>
@@ -758,8 +1241,8 @@ namespace WPFPlayerDemo
                 //暂停播放按钮
                 PauseButton.Visibility = System.Windows.Visibility.Visible;
                 PlayButton.Visibility = System.Windows.Visibility.Hidden;
-                menuPause.Visibility = System.Windows.Visibility.Visible;
-                menuPlay.Visibility = System.Windows.Visibility.Collapsed;
+                //menuPause.Visibility = System.Windows.Visibility.Visible;
+                //menuPlay.Visibility = System.Windows.Visibility.Collapsed;
                 tii.ThumbButtonInfos[1].ImageSource = (DrawingImage)Resources["PauseButtonImage"];
                 tii.ThumbButtonInfos[1].Command = MediaCommands.Pause;
                 //任务栏进度条
@@ -864,6 +1347,121 @@ namespace WPFPlayerDemo
                     singerBackground.ImageSource = new BitmapImage(new Uri(filepath));
                     this.Background = singerBackground;
                 });
+        }
+
+        /// <summary>
+        /// 歌词变化处理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LyricWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            Config config = Config.getInstance();
+            if (!addedLyric)
+            {
+                if (!lyric.Ready)
+                {
+                    Lrc.Children.Clear();
+                    ProgressBar pb = new ProgressBar();
+                    pb.SetResourceReference(StyleProperty, "LyricText");
+                    pb.Value = 1;
+                    pb.Tag = "正在加载歌词";
+                    pb.Foreground = new SolidColorBrush(Colors.Yellow);
+                    pb.Background = new SolidColorBrush(Colors.White);
+                    pb.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+                    pb.Maximum = 1;
+                    Lrc.Children.Add(pb);
+                }
+                else if (lyric.Lines == 0)
+                {
+                    Lrc.Children.Clear();
+                    ProgressBar pb = new ProgressBar();
+                    pb.SetResourceReference(StyleProperty, "LyricText");
+                    pb.Value = 0;
+                    pb.Tag = "无歌词";
+                    pb.Foreground = new SolidColorBrush(Colors.Yellow);
+                    pb.Background = new SolidColorBrush(Colors.White);
+                    pb.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+                    pb.Maximum = 1;
+                    Lrc.Children.Add(pb);
+                    addedLyric = true;
+                }
+                else
+                {
+                    Lrc.Children.Clear();
+                    for (int i = 0; i < lyric.Lines; i++)
+                    {
+                        ProgressBar pb = new ProgressBar();
+                        pb.SetResourceReference(StyleProperty, "LyricText");
+                        pb.Value = 0;
+                        pb.Tag = lyric.GetLine((uint)i);
+                        pb.Foreground = new SolidColorBrush(Colors.Yellow);
+                        pb.Background = new SolidColorBrush(Colors.White);
+                        pb.HorizontalAlignment = System.Windows.HorizontalAlignment.Right;
+                        pb.Maximum = 1;
+                        Lrc.Children.Add(pb);
+                    }
+                    addedLyric = true;
+                }
+            }
+            else
+            {
+                foreach (ProgressBar p in Lrc.Children)
+                    p.Value = 0;
+
+                ProgressBar pb = (ProgressBar)Lrc.Children[indexLyric];
+                pb.Value = config.lyricAnimation ? valueLyric : 1;
+                if (indexLyric > 3)
+                    Lrc.SetValue(Canvas.TopProperty, -(indexLyric - 4) * 68 / 3 - (config.lyricMove ? progressLyric * 68 / 3 : 0));
+                else
+                    Lrc.SetValue(Canvas.TopProperty, 0.0);
+            }
+        }
+
+        /// <summary>
+        /// 歌词处理线程
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LyricWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            Player player = playerForLyric;
+            while (!worker.CancellationPending)
+            {
+                if (lyric != null)
+                {
+                    if (addedLyric)
+                        valueLyric = lyric.FindLrc((int)(player.position * 1000), out indexLyric, out lrcLyric, out lenLyric, out progressLyric);
+                    worker.ReportProgress(0);
+                }
+                System.Threading.Thread.Sleep(50);
+            }
+        }
+
+        /// <summary>
+        /// 托盘图标点击
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void notifyIcon_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button == System.Windows.Forms.MouseButtons.Left) //左键
+            {
+                if (this.Visibility == System.Windows.Visibility.Visible)
+                    close(sender, null);
+                else
+                {
+                    //频谱线程和窗口歌词线程
+                    spectrumWorker.RunWorkerAsync();
+                    lyricWorker.RunWorkerAsync();
+                    //显示窗口
+                    this.Show();
+                    this.Activate();
+                }
+            }
+            else if (e.Button == System.Windows.Forms.MouseButtons.Right) //右键
+                ((ContextMenu)MainBody.FindResource("notifyIconMenu")).IsOpen = true;
         }
 
     }

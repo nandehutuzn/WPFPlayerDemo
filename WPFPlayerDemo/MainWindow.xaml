@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFPlayerDemo"
         mc:Ignorable="d"
-        Title="Music Player {$Version} 男的糊涂" Height="600" Width="800" Icon="iKu.ico" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" AllowDrop="True" Background="Black" ScrollViewer.VerticalScrollBarVisibility="Disabled" Style="{DynamicResource windowStyle}" Loaded="Window_Loaded" DragEnter="dragEnter" Drop="drop">
+        Title="iKu Player {$Version} 男的糊涂" Height="600" Width="800" Icon="iKu.ico" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" AllowDrop="True" Background="Black" ScrollViewer.VerticalScrollBarVisibility="Disabled" Style="{DynamicResource windowStyle}" Loaded="Window_Loaded" DragEnter="dragEnter" Drop="drop">
     <Window.Resources>
         <ResourceDictionary Source="mainWindowResources.xaml"/>
     </Window.Resources>
@@ -19,11 +19,11 @@
     </Window.Triggers>-->
     <Canvas x:Name="MainBody">
         <!-- 播放按钮 -->
-        <Button x:Name="PlayButton" Content="Play" HorizontalAlignment="Center" VerticalAlignment="Center" Width="100" Canvas.Top="392" Canvas.Left="343" Style="{DynamicResource btnPlayStyle}" Cursor="Hand" ToolTip="播放" IsTabStop="False" d:IsLocked="False" Click="PlayButton_Click">
+        <Button x:Name="PlayButton" Content="Play" HorizontalAlignment="Center" Height="100" VerticalAlignment="Center" Width="100" Canvas.Top="392" Canvas.Left="343" Style="{DynamicResource btnPlayStyle}" Cursor="Hand" ToolTip="播放" IsTabStop="False" d:IsLocked="False" Click="PlayButton_Click">
             <Button.Resources>
                 <Style x:Key="btnPlayStyle" TargetType="{x:Type Button}">
-                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
                     <Setter Property="Padding" Value="1"/>
                     <Setter Property="Template">
                         <Setter.Value>
@@ -45,8 +45,8 @@
         <Button x:Name="PauseButton" Content="Pause" HorizontalAlignment="Center" Height="100" VerticalAlignment="Center" Width="100" Canvas.Top="392" Canvas.Left="343" Style="{DynamicResource btnPauseStyle}" Cursor="Hand" ToolTip="暂停" Visibility="Hidden" IsTabStop="False" d:IsLocked="False" Click="PauseButton_Click">
             <Button.Resources>
                 <Style x:Key="btnPauseStyle" TargetType="{x:Type Button}">
-                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
                     <Setter Property="Padding" Value="1"/>
                     <Setter Property="Template">
                         <Setter.Value>
@@ -69,8 +69,8 @@
         <Button x:Name="LastButton" Content="Last" HorizontalAlignment="Center" Height="80" VerticalAlignment="Center" Width="80" Canvas.Top="402" Canvas.Left="153" Style="{DynamicResource btnLastStyle}" Cursor="Hand" ToolTip="上一曲" IsTabStop="False" d:IsLocked="False" Click="LastButton_Click">
             <Button.Resources>
                 <Style x:Key="btnLastStyle" TargetType="{x:Type Button}">
-                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
                     <Setter Property="Padding" Value="1"/>
                     <Setter Property="Template">
                         <Setter.Value>
@@ -90,11 +90,11 @@
             </Button.Resources>
         </Button>
         <!-- 下一曲按钮 -->
-        <Button x:Name="NextButton" Content="Next" HorizontalAlignment="Center" Height="80" Canvas.Top="402" Canvas.Left="553" Style="{DynamicResource btnNextStyle}" Cursor="Hand" ToolTip="下一曲" IsTabStop="False" d:IsLocked="False" Click="NextButton_Click">
+        <Button x:Name="NextButton" Content="Next" HorizontalAlignment="Center" Height="80" VerticalAlignment="Center" Width="80" Canvas.Top="402" Canvas.Left="553" Style="{DynamicResource btnNextStyle}" Cursor="Hand" ToolTip="下一曲" IsTabStop="False" d:IsLocked="False" Click="NextButton_Click">
             <Button.Resources>
                 <Style x:Key="btnNextStyle" TargetType="{x:Type Button}">
-                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
                     <Setter Property="Padding" Value="1"/>
                     <Setter Property="Template">
                         <Setter.Value>
@@ -117,8 +117,8 @@
         <Button x:Name="PlayListButton" Content="PlayList" HorizontalAlignment="Center" Height="40" VerticalAlignment="Center" Width="40" Style="{DynamicResource btnPlayListStyle}" Cursor="Hand" ToolTip="播放列表" IsTabStop="False" Canvas.Left="715" Canvas.Top="422" d:IsLocked="False" Click="PlayListButton_Click">
             <Button.Resources>
                 <Style x:Key="btnPlayListStyle" TargetType="{x:Type Button}">
-                    <Setter Property="HorizontalAlignment" Value="Center"/>
-                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
                     <Setter Property="Padding" Value="1"/>
                     <Setter Property="Template">
                         <Setter.Value>
@@ -262,8 +262,8 @@
             <Button x:Name="MuteButton" Content="Volume" HorizontalAlignment="Center" Height="40" VerticalAlignment="Center" Width="40" Style="{DynamicResource btnMuteStyle}" Cursor="Hand" ToolTip="静音" IsTabStop="False" Click="MuteButton_Click">
                 <Button.Resources>
                     <Style x:Key="btnMuteStyle" TargetType="{x:Type Button}">
-                        <Setter Property="HorizontalAlignment" Value="Center"/>
-                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
                         <Setter Property="Padding" Value="1"/>
                         <Setter Property="Template">
                             <Setter.Value>
@@ -283,12 +283,12 @@
                     </Style>
                 </Button.Resources>
             </Button>
-            <!-- 取消静音操作 -->
+            <!-- 取消静音操作（静音） -->
             <Button x:Name="VolumeButton" Content="Mute" HorizontalAlignment="Center" Height="40" VerticalAlignment="Center" Width="40" Style="{DynamicResource btnVolumeStyle}" Cursor="Hand" ToolTip="取消静音" IsTabStop="False" Visibility="Hidden" Click="VolumeButton_Click">
                 <Button.Resources>
                     <Style x:Key="btnVolumeStyle" TargetType="{x:Type Button}">
-                        <Setter Property="HorizontalAlignment" Value="Center"/>
-                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
                         <Setter Property="Padding" Value="1"/>
                         <Setter Property="Template">
                             <Setter.Value>
@@ -311,14 +311,14 @@
             <Slider x:Name="VolumeBar" Opacity="0.8" Style="{DynamicResource SimpleSlider}" Width="190" Height="14" Maximum="100" Orientation="Horizontal" SmallChange="1" TickPlacement="None" Cursor="Hand" Canvas.Top="13" Canvas.Left="60" Value="100" ValueChanged="VolumeBar_ValueChanged"/>
         </Canvas>
         <!-- 播放列表 -->
-        <Canvas x:Name="PlayList" Canvas.Left="10" Height="392" Width="766" Background="#CC000000" Opacity="0.9" ClipToBounds="True" d:IsLocked="False" >
+        <Canvas x:Name="PlayList" Canvas.Left="10" Height="392" Width="766" Background="#CC000000" Opacity="0.9" ClipToBounds="True" d:IsLocked="False"  d:IsHidden="True">
             <!--d:IsHidden="True"-->
             <!-- 播放列表 -->
             <ListBox x:Name="List" Height="342" Canvas.Left="10" Canvas.Top="10" Width="746" Background="#4CFFFFFF" Foreground="White" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Visible" SelectionMode="Extended" DragEnter="dragEnter" Drop="drop"/>
             <!-- 播放模式 -->
             <ComboBox x:Name="Model" Height="30" Canvas.Left="434" Canvas.Top="357" Width="106" Background="#CCFFFFFF" BorderBrush="Transparent" Opacity="0.8" IsReadOnly="True" SelectedIndex="0" FontSize="20" FontFamily="Consolas" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectionChanged="Model_SelectionChanged">
                 <ComboBoxItem Content="列表循环" FontSize="20" FontFamily="Consolas" Opacity="0.8" ToolTip="列表循环" IsTabStop="False"/>
-                <ComboBoxItem Content="顺序循环" FontSize="20" FontFamily="Consolas" Opacity="0.8" ToolTip="顺序循环" IsTabStop="False"/>
+                <ComboBoxItem Content="顺序播放" FontSize="20" FontFamily="Consolas" Opacity="0.8" ToolTip="顺序播放" IsTabStop="False"/>
                 <ComboBoxItem Content="单曲循环" FontSize="20" FontFamily="Consolas" Opacity="0.8" ToolTip="单曲循环" IsTabStop="False"/>
                 <ComboBoxItem Content="随机播放" FontSize="20" FontFamily="Consolas" Opacity="0.8" ToolTip="随机播放" IsTabStop="False"/>
             </ComboBox>
@@ -372,7 +372,7 @@
                 <MenuItem Header="上一曲" Click="LastButton_Click" Style="{StaticResource notifyIconMenuItem}"/>
                 <MenuItem Header="下一曲" Click="NextButton_Click" Style="{StaticResource notifyIconMenuItem}"/>
                 <Separator Style="{StaticResource notifyIconMenuSeparator}"/>
-                <MenuItem x:Name="menuDesktopLyric" Header="显示桌面歌词" Click="menuDesktopLyric_Click" IsCheckable="True" IsChecked="True" Style="{StaticResource notifyIconMenuItem}"/>
+                <MenuItem x:Name="menuDesktopLyric" Header="显示桌面歌词" Click="lrcSwitch" IsCheckable="True" IsChecked="True" Style="{StaticResource notifyIconMenuItem}"/>
                 <Separator Style="{StaticResource notifyIconMenuSeparator}"/>
                 <MenuItem Header="关于" Click="about" Style="{StaticResource notifyIconMenuItem}"/>
                 <MenuItem Header="退出" Click="exit" Style="{StaticResource notifyIconMenuItem}"/>

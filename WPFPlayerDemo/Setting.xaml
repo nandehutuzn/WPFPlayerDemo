@@ -10,9 +10,9 @@
         <ResourceDictionary Source="settingResources.xaml"/>
     </Window.Resources>
     <DockPanel>
-        <!-- 左侧菜单 -->
-        <StackPanel x:Name="leftMenu" DockPanel.Dock="Left" Background="#222"/>
-            <!-- 底部按钮 -->
+        <!--左侧菜单-->
+        <StackPanel x:Name="leftMenu" DockPanel.Dock="Left" Width="100px" Background="#222"/>
+        <!--底部按钮-->
         <Canvas DockPanel.Dock="Bottom" Height="40px" Background="#222">
             <Button Content="应用" Height="25px" Width="80px" Canvas.Top="7.5px" Canvas.Right="198px" Click="save"/>
             <Button Content="保存" Height="25px" Width="80px" Canvas.Top="7.5px" Canvas.Right="108px" TabIndex="0" Click="ok"/>

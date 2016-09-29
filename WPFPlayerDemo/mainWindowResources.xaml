@@ -11,8 +11,8 @@
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type Button}">
                     <Grid>
-                        <Ellipse Width="18" Opacity=".1" StrokeThickness="2" Fill="#4f535d" Stroke="White"/>
-                        <Ellipse x:Name="borderBtn" Width="18" Stroke="White" StrokeThickness="2"/>
+                        <Ellipse Width="18" Height="18" Opacity=".1" StrokeThickness="2" Fill="#4f535d" Stroke="White"/>
+                        <Ellipse x:Name="borderBtn" Width="18" Height="18" Stroke="White" StrokeThickness="2"/>
                         <!-- 按钮内容 -->
                         <Grid>
                             <Canvas HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">
@@ -45,7 +45,7 @@
                         <!--按钮内容-->
                         <Grid>
                             <Canvas HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">
-                                <Line StrokeThickness="2" Stroke="White" X1="3" X2="7" Y1="4" Y2="8"/>
+                                <Line StrokeThickness="2" Stroke="White" X1="3" X2="7" Y1="0" Y2="4"/>
                                 <Line StrokeThickness="2" Stroke="White" X1="7" Y1="4" X2="3" Y2="8"/>
                             </Canvas>
                         </Grid>
@@ -98,7 +98,7 @@
                 <ControlTemplate TargetType="Button">
                     <Grid>
                         <Border x:Name="borderoflrcbtnstyle" BorderBrush="White" BorderThickness="1" HorizontalAlignment="Center" Background="Transparent" Width="{TemplateBinding Width}">
-                            <TextBlock x:Name="textblockoflrcbtnstyle" Grid.Column="1" Text="{TemplateBinding Content}" HorizontalAlignment="Center" Margin="3,0,3,0" Foreground="White"/>
+                            <TextBlock x:Name="textblockoflrcbtnstyle" Grid.Column="1" Text="{TemplateBinding Content}"  HorizontalAlignment="Center" Margin="3 0 3 0" Foreground="White"/>
                         </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -119,7 +119,7 @@
                 <ControlTemplate TargetType="CheckBox">
                     <Grid>
                         <Border x:Name="borderoflrcbtnstyle" BorderBrush="White" BorderThickness="1" HorizontalAlignment="Center" Background="Transparent" Width="{TemplateBinding Width}">
-                            <TextBlock x:Name="textblockoflrcbtnstyle" Grid.Column="1" Text="{TemplateBinding Content}" HorizontalAlignment="Center" Margin="3,0,3,0" Foreground="White"/>
+                            <TextBlock x:Name="textblockoflrcbtnstyle" Grid.Column="1" Text="{TemplateBinding Content}"  HorizontalAlignment="Center" Margin="3 0 3 0" Foreground="White"/>
                         </Border>
                     </Grid>
                     <ControlTemplate.Triggers>
@@ -200,7 +200,7 @@
     <!-- 窗口样式模板-->
     <ControlTemplate x:Key="mainWindowTemplate" TargetType="{x:Type Window}">
         <Grid Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
-            <!-- borderBg 实现 窗体四周半透明的环绕 -->
+            <!--border元素：实现窗体四周半透明的环绕-->
             <Border BorderThickness="5" CornerRadius="6" BorderBrush="#000000" Opacity="0.08"/>
             <!-- borderBg实现半透明-->
             <Border x:Name="borderBg" Margin="5" Background="{TemplateBinding Background}" BorderBrush="#ffffff" Opacity="0.9" BorderThickness="2" CornerRadius="{StaticResource winCorner}" Style="{StaticResource winBorderStyle}">
@@ -224,7 +224,7 @@
                         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Visibility="Visible" Orientation="Horizontal">
                             <!-- 提前、延后、歌词开关、打开文件、设置、最小化和关闭按钮 -->
                             <Button x:Name="advanceButton" Style="{StaticResource btnAdvanceStyle}"/>
-                            <Button x:Name="delayButotn" Style="{StaticResource btnDelayStyle}"/>
+                            <Button x:Name="delayButton" Style="{StaticResource btnDelayStyle}"/>
                             <Button x:Name="OpenButton" Content="打开文件" Style="{StaticResource btnOpenStyle}"/>
                             <CheckBox x:Name="LrcButton" Content="桌面歌词" Style="{StaticResource btnLrcStyle}"/>
                             <Button x:Name="settingButton" Style="{StaticResource btnSettingStyle}"/>
@@ -247,7 +247,70 @@
         <Setter Property="WindowStyle" Value="None"/>
         <Setter Property="AllowsTransparency" Value="True"/>
     </Style>
-    <!-- 托盘菜单样式-->
+    <Style x:Key="LyricText" TargetType="{x:Type ProgressBar}">
+        <Setter Property="Foreground" Value="#01D328"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ProgressBar}">
+                    <Grid x:Name="Background" SnapsToDevicePixels="true">
+                        <TextBlock Text="{TemplateBinding Tag}" Foreground="{TemplateBinding Background}" Opacity="0.8" ScrollViewer.VerticalScrollBarVisibility="Disabled" FontSize="20" FontFamily="Courier New" FontWeight="Bold" TextAlignment="Left">
+								<!--<TextBlock.Effect>
+									<DropShadowEffect ShadowDepth="0" Color="Black" Opacity="1" BlurRadius="20"/>
+								</TextBlock.Effect>-->
+                        </TextBlock>
+                        <Rectangle x:Name="PART_Track"/>
+                        <Decorator x:Name="PART_Indicator" HorizontalAlignment="Left">
+                            <Grid x:Name="Foreground">
+                                <TextBlock x:Name="Indicator" Text="{TemplateBinding Tag}" Foreground="{TemplateBinding Foreground}" ScrollViewer.VerticalScrollBarVisibility="Disabled" FontSize="20" FontFamily="Courier New" FontWeight="Bold" TextAlignment="Left"/>
+                            </Grid>
+                        </Decorator>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--任务栏播放按钮-->
+    <DrawingImage x:Key="PlayButtonImage">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Brush="Green" Geometry="M 50,25 L 0,0 L 0,50 Z"/>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <!--任务栏暂停按钮-->
+    <DrawingImage x:Key="PauseButtonImage">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Brush="Yellow" Geometry="F1 M 0,0 V 50 H 20 V 0 Z M 30,0 V 50 H 50 V 0 Z"/>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <!--任务栏上一曲按钮-->
+    <DrawingImage x:Key="LastButtonImage">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Brush="White" Geometry="F1 M 0,25 L 24.5,50 V 0 Z M 25.5,25 L 50,50 V 0 Z"/>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <!--任务栏下一曲按钮-->
+    <DrawingImage x:Key="NextButtonImage">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <DrawingGroup.Children>
+                    <GeometryDrawing Brush="White" Geometry="F1 M 0,0 V 50 L 24.5,25 Z M 25.5,0 V 50 L 50,25 Z"/>
+                </DrawingGroup.Children>
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+    <!--托盘菜单样式-->
     <Style x:Key="notifyIconMenuStyle" TargetType="ContextMenu">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="OverridesDefaultStyle" Value="True"/>
@@ -271,6 +334,7 @@
             </Setter.Value>
         </Setter>
     </Style>
+    <!--托盘菜单项样式-->
     <!--分割条-->
     <Style x:Key="notifyIconMenuSeparator" TargetType="Separator">
         <Setter Property="Height" Value="1"/>
@@ -283,8 +347,157 @@
             </Setter.Value>
         </Setter>
     </Style>
-    <!-- 菜单样式 -->
-    <Style x:Key="notifyIconMenuItem" TargetType="{x:Type MenuItem}">
+    <!--菜单项-->
+    <ControlTemplate x:Key="{x:Static MenuItem.SubmenuItemTemplateKey}" TargetType="MenuItem">
+        <!--整个背景，带一点透明保证在没有文字的地方也能接受到焦点-->
+        <Border Name="Border" Background="#01000000">
+            <Grid Margin="0,2">
+                <Grid.ColumnDefinitions>
+                    <!--图标或勾选框-->
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
+                    <!--内容-->
+                    <ColumnDefinition Width="*"/>
+                    <!--快捷键-->
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
+                    <!--空出（与带子菜单的菜单项对齐）-->
+                    <ColumnDefinition Width="13"/>
+                </Grid.ColumnDefinitions>
+                <!--图标-->
+                <ContentPresenter Grid.Column="0" Width="13" Height="13" Name="Icon" Margin="6,1,6,0" VerticalAlignment="Center" ContentSource="Icon"/>
+                <!--勾选框-->
+                <Border Name="Check" Grid.Column="0" Width="13" Height="13" Visibility="Collapsed" Margin="6,1,6,0">
+                    <!--勾选图标-->
+                    <Path Name="CheckMark" Width="7" Height="7" Visibility="Hidden" SnapsToDevicePixels="False" Stroke="White" StrokeThickness="2" Data="M 0 4 L 3 7 L 7 0"/>
+                </Border>
+                <!--内容-->
+                <ContentPresenter Name="Content" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" Margin="0,2">
+                    <ContentPresenter.ContentTemplate>
+                        <DataTemplate>
+                            <TextBlock Foreground="White" Text="{TemplateBinding Content}"/>
+                        </DataTemplate>
+                    </ContentPresenter.ContentTemplate>
+                </ContentPresenter>
+                <!--快捷键信息显示-->
+                <TextBlock Name="InputGestureText" Grid.Column="2" Foreground="White" Text="{TemplateBinding InputGestureText}" Margin="20,3,0,2" DockPanel.Dock="Right"/>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <!--图标为空时隐藏-->
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
+            </Trigger>
+            <!--为选择框则隐藏图标-->
+            <Trigger Property="IsCheckable" Value="true">
+                <Setter TargetName="Check" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
+            </Trigger>
+            <!--是否勾选选择框-->
+            <Trigger Property="IsChecked" Value="true">
+                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+            </Trigger>
+            <!--获取焦点状态-->
+            <Trigger Property="IsHighlighted" Value="true">
+                <Setter TargetName="Border" Property="Background" Value="#DDD"/>
+                <Setter TargetName="InputGestureText" Property="Foreground" Value="Black"/>
+                <Setter TargetName="Content" Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Foreground="Black" Text="{TemplateBinding Content}"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter TargetName="CheckMark" Property="Stroke" Value="Black"/>
+            </Trigger>
+            <!--不可用状态-->
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="InputGestureText" Property="Foreground" Value="#888"/>
+                <Setter TargetName="Content" Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Foreground="#888" Text="{TemplateBinding Content}"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Setter TargetName="CheckMark" Property="Stroke" Value="#888"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <!--带子菜单的菜单项-->
+    <ControlTemplate x:Key="{x:Static MenuItem.SubmenuHeaderTemplateKey}" TargetType="MenuItem">
+        <!--整个背景，带一点透明保证在没有文字的地方也能接受到焦点-->
+        <Border Name="Border" Background="#01000000">
+            <Grid Margin="0,2">
+                <Grid.ColumnDefinitions>
+                    <!--图标-->
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Icon"/>
+                    <!--内容-->
+                    <ColumnDefinition Width="*"/>
+                    <!--快捷键-->
+                    <ColumnDefinition Width="Auto" SharedSizeGroup="Shortcut"/>
+                    <!--下一级箭头-->
+                    <ColumnDefinition Width="13"/>
+                </Grid.ColumnDefinitions>
+                <!--图标-->
+                <ContentPresenter Grid.Column="0" Width="13" Height="13" Name="Icon" Margin="6,1,6,0" VerticalAlignment="Center" ContentSource="Icon"/>
+                <!--内容-->
+                <ContentPresenter Name="Content" Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" Margin="0,2">
+                    <ContentPresenter.ContentTemplate>
+                        <DataTemplate>
+                            <TextBlock Foreground="White" Text="{TemplateBinding Content}"/>
+                        </DataTemplate>
+                    </ContentPresenter.ContentTemplate>
+                </ContentPresenter>
+                <!--快捷键信息显示-->
+                <TextBlock Name="InputGestureText" Grid.Column="2" Foreground="White" Text="{TemplateBinding InputGestureText}" Margin="20,3,0,2" DockPanel.Dock="Right"/>
+                <!--下一级箭头-->
+                <Path Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Data="M 0 0 L 0 7 L 4 3.5 Z" Fill="#444"/>
+                <!--下一级菜单-->
+                <Popup Name="Popup" Placement="Right" HorizontalOffset="-4" IsOpen="{TemplateBinding IsSubmenuOpen}" AllowsTransparency="True" Focusable="False" PopupAnimation="Fade">
+                    <Border Name="SubmenuBorder" Background="Black" BorderThickness="1">
+                        <Border.BorderBrush>
+                            <SolidColorBrush Color="#FF888888"/>
+                        </Border.BorderBrush>
+                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                    </Border>
+                </Popup>
+            </Grid>
+        </Border>
+        <ControlTemplate.Triggers>
+            <!--图标为空时隐藏-->
+            <Trigger Property="Icon" Value="{x:Null}">
+                <Setter TargetName="Icon" Property="Visibility" Value="Hidden"/>
+            </Trigger>
+            <!--获取焦点状态-->
+            <Trigger Property="IsHighlighted" Value="true">
+                <Setter TargetName="Border" Property="Background" Value="#DDD"/>
+                <Setter TargetName="InputGestureText" Property="Foreground" Value="Black"/>
+                <Setter TargetName="Content" Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Foreground="Black" Text="{TemplateBinding Content}"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            <!--不可用状态-->
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter TargetName="InputGestureText" Property="Foreground" Value="#888"/>
+                <Setter TargetName="Content" Property="ContentTemplate">
+                    <Setter.Value>
+                        <DataTemplate>
+                            <TextBlock Foreground="#888" Text="{TemplateBinding Content}"/>
+                        </DataTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Trigger>
+            <Trigger SourceName="Popup" Property="Popup.AllowsTransparency" Value="True">
+                <Setter TargetName="SubmenuBorder" Property="CornerRadius" Value="4"/>
+                <Setter TargetName="SubmenuBorder" Property="Padding" Value="0,3,0,3"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+    <!--菜单样式-->
+    <Style x:Key="notifyIconMenuItem" TargetType="MenuItem">
         <Setter Property="OverridesDefaultStyle" Value="True"/>
         <Style.Triggers>
             <Trigger Property="Role" Value="SubmenuHeader">

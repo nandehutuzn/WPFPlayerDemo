@@ -48,7 +48,7 @@ namespace WPFPlayerDemo
             }
 
             //默认音量
-            volume = 100;
+            volumn = 100;
         }
 
         public static Player getInstance(IntPtr windowHandle)
@@ -98,7 +98,7 @@ namespace WPFPlayerDemo
         /// <summary>
         /// 音量
         /// </summary>
-        public int volume
+        public int volumn
         {
             get {
                 float value = 100;
@@ -149,6 +149,41 @@ namespace WPFPlayerDemo
                     return Bass.BASS_ChannelIsActive(stream);
                 }
                 return BASSActive.BASS_ACTIVE_STOPPED;
+            }
+        }
+
+        /// <summary>
+        /// 是否已打开过文件
+        /// </summary>
+        public bool openedFile
+        {
+            get { return stream != 0; }
+        }
+
+        /// <summary>
+        /// 暂停播放
+        /// </summary>
+        /// <returns></returns>
+        public bool pause()
+        {
+            return Bass.BASS_ChannelPause(stream);
+        }
+
+        /// <summary>
+        /// 设置静音
+        /// </summary>
+        public bool mute
+        {
+            set {
+                _mute = value;
+                if (value)
+                {
+                    int v = _volumn;
+                    volumn = 0;
+                    _volumn = v;
+                }
+                else
+                    volumn = _volumn;
             }
         }
 
@@ -287,7 +322,7 @@ namespace WPFPlayerDemo
             //打开新文件
             stream = Bass.BASS_StreamCreateFile(filePath, 0L, 0L, BASSFlag.BASS_SAMPLE_FLOAT);
             //设置音量
-            volume = _volumn;
+            volumn = _volumn;
             return stream != 0;
         }
 
@@ -299,7 +334,7 @@ namespace WPFPlayerDemo
         public bool play(bool restart = false)
         {
             //设置音量
-            volume = _volumn;
+            volumn = _volumn;
             return stream != 0 && Bass.BASS_ChannelPlay(stream, restart);
         }
     }

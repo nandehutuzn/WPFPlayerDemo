@@ -205,6 +205,162 @@ namespace WPFPlayerDemo
         }
 
         /// <summary>
+        /// 歌词加载完毕
+        /// </summary>
+        public bool Ready { get { return ready; } }
+
+        /// <summary>
+        /// 歌词行数
+        /// </summary>
+        public int Lines { get { return text == null ? 0 : text.Count; } }
+
+        /// <summary>
+        /// 取消歌词文本
+        /// </summary>
+        /// <param name="index">歌词行索引</param>
+        /// <returns>行歌词</returns>
+        public string GetLine(uint index)
+        {
+            //超过最大行
+            if (index >= Lines)
+                return string.Empty;
+            //拼接当前行
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < text[(int)index].content.Count; i++)
+                sb.Append(text[(int)index].content[i].word);
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// 查询当前时间所对应的那一句歌词
+        /// </summary>
+        /// <param name="time">时间（毫秒）</param>
+        /// <param name="index">行序号</param>
+        /// <param name="lrc">歌词</param>
+        /// <param name="len">当前句全长</param>
+        /// <param name="progress">已过当前句时间进度</param>
+        /// <returns>当前歌词已经过的进度</returns>
+        public double FindLrc(int time, out int index, out string lrc, out double len, out double progress)
+        {
+            if (Lines == 0)
+            { 
+                //没有歌词
+                lrc = "无歌词";
+                index = 0;
+                len = 0;
+                progress = 0;
+                return 0;
+            }
+            //偏移
+            time += offset;
+            //寻找当前所在行
+            for (index = 0; index < text.Count; index++)
+            {
+                if (text[index].time + text[index].during >= time ||  //处于当前行结尾之前
+                    index == text.Count - 1 ||  //已是寻找的最后一句
+                    text[index + 1].time > time)  //还未找到下一句
+                    break;
+            }
+            if (index == text.Count)  //查找失败
+            {
+                lrc = string.Empty;
+                index = Lines;
+                len = 0;
+                progress = 1;
+                return 0;
+            }
+            //找到当前行
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < text[index].content.Count; i++)
+                sb.Append(text[index].content[i].word);
+            lrc = sb.ToString();
+            //显示宽度
+            if (text[index].width == double.MinValue)  //还未计算显示宽度
+            {
+                SingleLrc tmp = text[index];
+                //计算宽度
+                tmp.width = getTextWidth(lrc);
+                text[index] = tmp;
+                lrcUpdated = true;
+            }
+            len = text[index].width;
+            if (text[index].time > time || len == 0) //还未到当前行
+            {
+                progress = 0;
+                return 0;
+            }
+            //已到当前行
+            //当前句已过时间
+            time -= text[index].time;
+            //时间进度
+            if (index == text.Count - 1)
+                progress = (double)time / text[index].during;
+            else
+                progress = (double)time / (text[index + 1].time - text[index].time);
+            string tt = string.Empty;
+            //寻找当前所在词
+            for (int n = 0; n < text[index].content.Count; n++)
+            {
+                if (text[index].content[n].time + text[index].content[n].during >= time) //处于当前词结尾之前
+                { 
+                    //之前词显示宽度
+                    if (text[index].content[n].widthBefore == double.MinValue)
+                    {
+                        //取出
+                        SingleLrc tmpS = text[index];
+                        LrcWord tmpL = tmpS.content[n];
+                        //计算
+                        tmpL.widthBefore = getTextWidth(tt);
+                        //放回
+                        tmpS.content[n] = tmpL;
+                        text[index] = tmpS;
+                        lrcUpdated = true;
+                    }
+                    //当前词显示宽度
+                    if (text[index].content[n].width == double.MinValue)
+                    { 
+                        //取出
+                        SingleLrc tmpS = text[index];
+                        LrcWord tmpL = tmpS.content[n];
+                        //计算
+                        tmpL.width = getTextWidth(text[index].content[n].word);
+                        //放回
+                        tmpS.content[n] = tmpL;
+                        text[index] = tmpS;
+                        lrcUpdated = true;
+                    }
+                    //当前词已过时间
+                    time -= text[index].content[n].time;
+                    //z当前词已过百分比
+                    double p = 0;
+                    if (time > 0)
+                        p = text[index].content[n].width * time / text[index].content[n].during;
+                    p += text[index].content[n].widthBefore;
+                    //当前句已过显示百分比
+                    return p / len;
+                }
+                //已过当前词
+                tt += text[index].content[n].word;
+            }
+            //已过当前句
+            return 1;
+        }
+
+        /// <summary>
+        /// 计算文本在当前字体显示的宽度
+        /// </summary>
+        /// <param name="text">待计算的文本</param>
+        /// <returns>宽度</returns>
+        private double getTextWidth(string text)
+        {
+            return new FormattedText(text,
+                System.Globalization.CultureInfo.CurrentCulture,
+                FlowDirection.LeftToRight,
+                new Typeface(fontFamily, fontStyle, fontWeight, fontStretch),
+                fontSize, foreground).Width;
+        }
+
+        /// <summary>
         /// 解析时间偏移
         /// </summary>
         /// <param name="lrc">歌词数据文本</param>

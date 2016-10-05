@@ -230,11 +230,6 @@ namespace WPFPlayerDemo
             singerBackground.AlignmentX = AlignmentX.Center;
             singerBackground.AlignmentY = AlignmentY.Center;
 
-            //if (!Bass.BASS_Init(-1, 44100, BASSInit.BASS_DEVICE_CPSPEAKERS, IntPtr.Zero))
-            //    MessageBox.Show("Bass 初始化失败 " + Bass.BASS_ErrorGetCode().ToString());
-            //string file = @"E:\KuGou\Christina Aguilera - We Remain.mp3";
-            //int stream = Bass.BASS_StreamCreateFile(file, 0L, 0L, BASSFlag.BASS_SAMPLE_FLOAT);
-            //Bass.BASS_ChannelPlay(stream, true);
         }
 
         /// <summary>
@@ -272,33 +267,36 @@ namespace WPFPlayerDemo
             //菜单
             menu = (ContextMenu)MainBody.FindResource("notifyIconMenu");
             //菜单播放项
-            menuPlay = (MenuItem)this.FindName("menuPlay");
+            //menuPlay = (MenuItem)menu.FindName("menuPlay");  //此方法返回null
+            menuPlay = LogicalTreeHelper.FindLogicalNode(menu, "menuPlay") as MenuItem;
             //菜单暂停项
-            menuPause = (MenuItem)this.FindName("menuPause");
+            //menuPause = (MenuItem)menu.FindName("menuPause");
+            menuPause = LogicalTreeHelper.FindLogicalNode(menu, "menuPause") as MenuItem;
             //菜单桌面歌词开关项
-            menuDesktopLyric = (MenuItem)this.FindName("menuDesktopLyric");
+            //menuDesktopLyric = (MenuItem)this.FindName("menuDesktopLyric");
+            menuDesktopLyric = LogicalTreeHelper.FindLogicalNode(menu, "menuDesktopLyric") as MenuItem;
 
             //事件绑定
-            this.CommandBindings.Add(new CommandBinding(MediaCommands.Play, (m_sender, m_e) =>
-                {
-                    PlayButton_Click(m_sender, null);
-                    m_e.Handled = true;
-                }));  //播放
-            this.CommandBindings.Add(new CommandBinding(MediaCommands.Pause, (m_sender, m_e) =>
-                {
-                    PauseButton_Click(m_sender, null);
-                    m_e.Handled = true;
-                })); //暂停
-            this.CommandBindings.Add(new CommandBinding(MediaCommands.PreviousTrack, (m_sender, m_e) =>
-                {
-                    LastButton_Click(m_sender, null);
-                    m_e.Handled = true;
-                }));//上一曲
-            this.CommandBindings.Add(new CommandBinding(MediaCommands.NextTrack, (m_sender, m_e) =>
-                {
-                    NextButton_Click(m_sender, null);
-                    m_e.Handled = true;
-                }));//下一曲
+            //this.CommandBindings.Add(new CommandBinding(MediaCommands.Play, (m_sender, m_e) =>
+            //    {
+            //        PlayButton_Click(m_sender, null);
+            //        m_e.Handled = true;
+            //    }));  //播放
+            //this.CommandBindings.Add(new CommandBinding(MediaCommands.Pause, (m_sender, m_e) =>
+            //    {
+            //        PauseButton_Click(m_sender, null);
+            //        m_e.Handled = true;
+            //    })); //暂停
+            //this.CommandBindings.Add(new CommandBinding(MediaCommands.PreviousTrack, (m_sender, m_e) =>
+            //    {
+            //        LastButton_Click(m_sender, null);
+            //        m_e.Handled = true;
+            //    }));//上一曲
+            //this.CommandBindings.Add(new CommandBinding(MediaCommands.NextTrack, (m_sender, m_e) =>
+            //    {
+            //        NextButton_Click(m_sender, null);
+            //        m_e.Handled = true;
+            //    }));//下一曲
 
             //频谱
             for (int i = 1; i <= 42; i++)
@@ -798,6 +796,8 @@ namespace WPFPlayerDemo
             //关闭窗口
             this.Close();
             //结束程序
+            MediaElement me = new MediaElement();
+            
             Application.Current.Shutdown();
         }
 
@@ -907,6 +907,7 @@ namespace WPFPlayerDemo
                 //关闭桌面歌词
                 desktopLyric.Close();
                 desktopLyric.Dispose();
+                desktopLyric = null;
             }
         }
 

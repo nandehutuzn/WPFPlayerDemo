@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFPlayerDemo"
         mc:Ignorable="d"
-        Title="设置" Height="350" Width="500" Icon="iKu.ico" ResizeMode="NoResize" Background="Black" ScrollViewer.VerticalScrollBarVisibility="Disabled" Style="{DynamicResource settingStyle}" Loaded="Window_Loaded" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+        Title="设置" Height="350" Width="500" Icon="iKu.ico" ResizeMode="NoResize" Background="Black" ScrollViewer.VerticalScrollBarVisibility="Disabled" Style="{DynamicResource settingStyle}" Loaded="Window_Loaded" WindowStartupLocation="CenterOwner" ShowInTaskbar="False" MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Window.Resources>
         <ResourceDictionary Source="settingResources.xaml"/>
     </Window.Resources>
